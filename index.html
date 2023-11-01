@@ -6,6 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>gchessboard</title>
 
+    <style>
+        #gameBoardBorder {
+            width: 480px;
+            height: 480px;
+            border: solid;
+            border-color: black;
+            border-width: 2px;
+            float: left;
+            line-height: 0;
+        }
+
+        #gameBoardBorder>* {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: sans-serif;
+        }
+
+        .whiteSquare {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+        }
+
+        .blackSquare {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: black;
+        }
+
+        body {
+            background-color: lightblue;
+        }
+    </style>
+
     <script type="module">
         import { main } from "./build/dev/javascript/gchessboard/gchessboard.mjs";
 

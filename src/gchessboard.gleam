@@ -3,6 +3,7 @@ import lustre
 import lustre/element.{text}
 import lustre/element/html.{button, div, p}
 import lustre/event.{on_click}
+import lustre/attribute.{id}
 
 pub fn main() {
   let app = lustre.simple(init, update, view)
@@ -28,14 +29,75 @@ fn update(model, msg) {
 }
 
 fn view(model) {
-  let count = int.to_string(model)
+  // let count = int.to_string(model)
 
   div(
-    [],
+    [id("gameBoardBorder")],
     [
-      button([on_click(Decr)], [text(" - ")]),
-      p([], [text(count)]),
-      button([on_click(Incr)], [text(" + ")]),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
+      div([attribute.class("blackSquare")], []),
+      div([attribute.class("whiteSquare")], []),
     ],
   )
 }
