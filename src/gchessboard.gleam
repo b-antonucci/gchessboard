@@ -1,9 +1,8 @@
-import gleam/int
 import lustre
-import lustre/element.{text}
-import lustre/element/html.{button, div, p}
-import lustre/event.{on_click}
-import lustre/attribute.{id}
+import lustre/event
+import lustre/element/html.{div}
+import lustre/attribute.{class, id, property}
+import board.{empty_board}
 
 pub fn main() {
   let app = lustre.simple(init, update, view)
@@ -13,91 +12,102 @@ pub fn main() {
 }
 
 fn init(_) {
-  0
+  #(empty_board(), False)
 }
 
 type Msg {
-  Incr
-  Decr
+  RightClick
 }
 
 fn update(model, msg) {
   case msg {
-    Incr -> model + 1
-    Decr -> model - 1
+    RightClick -> {
+      case model {
+        #(board, True) -> #(board, False)
+        #(board, False) -> #(board, True)
+      }
+    }
   }
 }
 
 fn view(model) {
-  // let count = int.to_string(model)
-
   div(
-    [id("gameBoardBorder")],
+    [id("gameBoardBorder"), property("oncontextmenu", "return false;")],
     [
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
-      div([attribute.class("blackSquare")], []),
-      div([attribute.class("whiteSquare")], []),
+      div(
+        [
+          class("whiteSquare"),
+          case model {
+            #(_, True) -> attribute.style([#("background-color", "red")])
+            #(_, False) -> attribute.style([#("background-color", "white")])
+          },
+          event.on("contextmenu", fn(_) { Ok(RightClick) }),
+        ],
+        [],
+      ),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
+      div([class("blackSquare")], []),
+      div([class("whiteSquare")], []),
     ],
   )
 }

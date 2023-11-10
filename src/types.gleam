@@ -1,12 +1,12 @@
 import gleam/option.{type Option}
 import gleam/map.{type Map}
 
-type Player {
+pub type Player {
   White
   Black
 }
 
-type Piece {
+pub type Piece {
   Pawn(en_passant: Option(Position))
   Knight
   Bishop
@@ -15,11 +15,11 @@ type Piece {
   King
 }
 
-type PlayerPiece {
+pub type PlayerPiece {
   PlayerPiece(player: Player, piece: Piece, moved: Bool)
 }
 
-type Rank {
+pub type Rank {
   One
   Two
   Three
@@ -30,7 +30,7 @@ type Rank {
   Eight
 }
 
-type File {
+pub type File {
   A
   B
   C
@@ -41,15 +41,15 @@ type File {
   H
 }
 
-type Position {
+pub type Position {
   Position(file: File, rank: Rank)
 }
 
-type PlayerInfo {
+pub type PlayerInfo {
   PlayerInfo(can_castle: Bool, in_check: Bool, king_position: Position)
 }
 
-type MoveType {
+pub type MoveType {
   Capture
   Goto
   PawnJump
@@ -59,18 +59,14 @@ type MoveType {
   Promotion
 }
 
-type Move {
+pub type Move {
   Move(move_type: MoveType, position: Position)
 }
 
-type Square {
+pub type Square {
   Square(
     position: Position,
     player_piece: PlayerPiece,
     move_to_play: Option(Move),
   )
-}
-
-type Board {
-  Board(squares: Map(Int, Square))
 }
