@@ -47,7 +47,7 @@ pub fn new_board() -> Board {
             ),
             player_piece: None,
             move_to_play: None,
-            right_click_detected: False,
+            highlighted: False,
           ),
         )
       },

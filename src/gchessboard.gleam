@@ -20,22 +20,38 @@ fn init(_) {
 
 type Msg {
   RightClick(index: Int)
+  LeftClick(index: Int)
 }
 
 fn update(model: board.Board, msg) {
   case msg {
     RightClick(index) -> {
       let assert Ok(square) = map.get(model.squares, index)
-      let new_square = case square.right_click_detected {
+      let new_square = case square.highlighted {
         True -> {
-          types.Square(..square, right_click_detected: False)
+          types.Square(..square, highlighted: False)
         }
         False -> {
-          types.Square(..square, right_click_detected: True)
+          types.Square(..square, highlighted: True)
         }
       }
       let new_squares = map.insert(model.squares, index, new_square)
       board.Board(squares: new_squares)
+    }
+    LeftClick(_index) -> {
+      map.fold(
+        model.squares,
+        model,
+        fn(model, index, square) {
+          let new_squares =
+            map.insert(
+              model.squares,
+              index,
+              types.Square(..square, highlighted: False),
+            )
+          board.Board(squares: new_squares)
+        },
+      )
     }
   }
 }
@@ -56,20 +72,16 @@ fn draw_board(model: board.Board) {
     fn(square_list, index) {
       let assert Ok(class_name) = list.at(color_order, index % 16)
       let assert Ok(square) = map.get(model.squares, index)
-      let background_color = case class_name {
-        "whiteSquare" -> "white"
-        "blackSquare" -> "black"
-      }
       let square_div =
         div(
           [
             class(class_name),
-            case square.right_click_detected {
-              True -> attribute.style([#("background-color", "red")])
-              False ->
-                attribute.style([#("background-color", background_color)])
+            case square.highlighted {
+              True -> attribute.style([#("border-style", "solid")])
+              False -> attribute.style([#("border-style", "none")])
             },
             event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
+            event.on("click", fn(_) { Ok(LeftClick(index)) }),
           ],
           [],
         )

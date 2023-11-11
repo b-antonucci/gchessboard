@@ -67,6 +67,6 @@ pub type Square {
     position: Position,
     player_piece: Option(PlayerPiece),
     move_to_play: Option(Move),
-    right_click_detected: Bool,
+    highlighted: Bool,
   )
 }
