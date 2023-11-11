@@ -1,5 +1,4 @@
 import gleam/option.{type Option}
-import gleam/map.{type Map}
 
 pub type Player {
   White
@@ -66,7 +65,8 @@ pub type Move {
 pub type Square {
   Square(
     position: Position,
-    player_piece: PlayerPiece,
+    player_piece: Option(PlayerPiece),
     move_to_play: Option(Move),
+    right_click_detected: Bool,
   )
 }
