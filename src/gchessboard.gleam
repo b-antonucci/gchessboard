@@ -72,18 +72,24 @@ fn draw_board(model: board.Board) {
     fn(square_list, index) {
       let assert Ok(class_name) = list.at(color_order, index % 16)
       let assert Ok(square) = map.get(model.squares, index)
+
+      let square_color = case class_name {
+        "whiteSquare" -> "#f0d9b5"
+        "blackSquare" -> "#b58863"
+      }
       let square_div =
         div(
           [
             class(class_name),
             case square.highlighted {
-              True -> attribute.style([#("border-style", "solid")])
-              False -> attribute.style([#("border-style", "none")])
+              True ->
+                attribute.style([#("border-color", "rgba(0, 128, 0, 0.654)")])
+              False -> attribute.style([#("border-color", square_color)])
             },
             event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
             event.on("click", fn(_) { Ok(LeftClick(index)) }),
           ],
-          [],
+          [html.img([attribute.src("assets/Chess_kdt45.svg")])],
         )
       [square_div, ..square_list]
     },
