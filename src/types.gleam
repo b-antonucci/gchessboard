@@ -1,4 +1,7 @@
 import gleam/option.{type Option}
+import gleam/map.{type Map}
+import file.{type File}
+import rank.{type Rank}
 
 pub type Player {
   White
@@ -18,30 +21,14 @@ pub type PlayerPiece {
   PlayerPiece(player: Player, piece: Piece, moved: Bool)
 }
 
-pub type Rank {
-  One
-  Two
-  Three
-  Four
-  Five
-  Six
-  Seven
-  Eight
-}
-
-pub type File {
-  A
-  B
-  C
-  D
-  E
-  F
-  G
-  H
-}
-
 pub type Position {
   Position(file: File, rank: Rank)
+}
+
+pub fn position_from_int(index: Int) -> Position {
+  let file = file.from_int(index % 8)
+  let rank = rank.from_int(index / 8)
+  Position(file, rank)
 }
 
 pub type PlayerInfo {
@@ -58,15 +45,17 @@ pub type MoveType {
   Promotion
 }
 
-pub type Move {
-  Move(move_type: MoveType, position: Position)
+pub type Moves {
+  Moves(moves: List(Position))
 }
 
 pub type Square {
   Square(
     position: Position,
     player_piece: Option(PlayerPiece),
-    move_to_play: Option(Move),
+    moves_to_play: Option(Moves),
     highlighted: Bool,
+    selected: Bool,
+    targeted: Bool,
   )
 }

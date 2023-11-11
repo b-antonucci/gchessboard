@@ -1,7 +1,6 @@
-import types.{
-  type File, type Rank, type Square, A, B, C, D, E, Eight, F, Five, Four, G, H,
-  One, Seven, Six, Three, Two,
-}
+import types.{type Square}
+import rank.{type Rank, Eight, Five, Four, One, Seven, Six, Three, Two}
+import file.{type File, A, B, C, D, E, F, G, H}
 import gleam/map.{type Map}
 import gleam/option.{None, Some}
 import gleam/list.{range}
@@ -46,8 +45,10 @@ pub fn new_board() -> Board {
               },
             ),
             player_piece: None,
-            move_to_play: None,
+            moves_to_play: None,
             highlighted: False,
+            selected: False,
+            targeted: False,
           ),
         )
       },
@@ -56,7 +57,276 @@ pub fn new_board() -> Board {
   Board(squares)
 }
 
+const list_of_starting_position_moves = [
+  #(0, None),
+  #(
+    1,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: A, rank: Three),
+          types.Position(file: C, rank: Three),
+        ],
+      ),
+    ),
+  ),
+  #(2, None),
+  #(3, None),
+  #(4, None),
+  #(5, None),
+  #(
+    6,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: F, rank: Three),
+          types.Position(file: H, rank: Three),
+        ],
+      ),
+    ),
+  ),
+  #(7, None),
+  #(
+    8,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: A, rank: Three),
+          types.Position(file: A, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    9,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: B, rank: Three),
+          types.Position(file: B, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    10,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: C, rank: Three),
+          types.Position(file: C, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    11,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: D, rank: Three),
+          types.Position(file: D, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    12,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: E, rank: Three),
+          types.Position(file: E, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    13,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: F, rank: Three),
+          types.Position(file: F, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    14,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: G, rank: Three),
+          types.Position(file: G, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(
+    15,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: H, rank: Three),
+          types.Position(file: H, rank: Four),
+        ],
+      ),
+    ),
+  ),
+  #(16, None),
+  #(17, None),
+  #(18, None),
+  #(19, None),
+  #(20, None),
+  #(21, None),
+  #(22, None),
+  #(23, None),
+  #(24, None),
+  #(25, None),
+  #(26, None),
+  #(27, None),
+  #(28, None),
+  #(29, None),
+  #(30, None),
+  #(31, None),
+  #(32, None),
+  #(33, None),
+  #(34, None),
+  #(35, None),
+  #(36, None),
+  #(37, None),
+  #(38, None),
+  #(39, None),
+  #(40, None),
+  #(41, None),
+  #(42, None),
+  #(43, None),
+  #(44, None),
+  #(45, None),
+  #(46, None),
+  #(47, None),
+  #(
+    48,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: A, rank: Six),
+          types.Position(file: A, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    49,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: B, rank: Six),
+          types.Position(file: B, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    50,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: C, rank: Six),
+          types.Position(file: C, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    51,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: D, rank: Six),
+          types.Position(file: D, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    52,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: E, rank: Six),
+          types.Position(file: E, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    53,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: F, rank: Six),
+          types.Position(file: F, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    54,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: G, rank: Six),
+          types.Position(file: G, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(
+    55,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: H, rank: Six),
+          types.Position(file: H, rank: Five),
+        ],
+      ),
+    ),
+  ),
+  #(56, None),
+  #(
+    57,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: A, rank: Six),
+          types.Position(file: C, rank: Six),
+        ],
+      ),
+    ),
+  ),
+  #(58, None),
+  #(59, None),
+  #(60, None),
+  #(61, None),
+  #(
+    62,
+    Some(
+      types.Moves(
+        moves: [
+          types.Position(file: F, rank: Six),
+          types.Position(file: H, rank: Six),
+        ],
+      ),
+    ),
+  ),
+  #(63, None),
+]
+
 pub fn starting_position_board() -> Board {
+  let map_of_starting_position_moves =
+    map.from_list(list_of_starting_position_moves)
   let list_of_pieces: List(#(Int, option.Option(types.PlayerPiece))) = [
     #(
       0,
@@ -353,6 +623,8 @@ pub fn starting_position_board() -> Board {
       list_of_pieces,
       map.new(),
       fn(map, index_and_piece) {
+        let assert Ok(moves_to_play) =
+          map.get(map_of_starting_position_moves, index_and_piece.0)
         map
         |> map.insert(
           index_and_piece.0,
@@ -370,8 +642,10 @@ pub fn starting_position_board() -> Board {
               },
             ),
             player_piece: index_and_piece.1,
-            move_to_play: None,
+            moves_to_play: moves_to_play,
             highlighted: False,
+            selected: False,
+            targeted: False,
           ),
         )
       },

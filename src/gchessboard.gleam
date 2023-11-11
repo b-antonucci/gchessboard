@@ -27,6 +27,20 @@ type Msg {
 fn update(model: board.Board, msg) {
   case msg {
     RightClick(index) -> {
+      let model =
+        map.fold(
+          model.squares,
+          model,
+          fn(model, square_index, square) {
+            let new_squares =
+              map.insert(
+                model.squares,
+                square_index,
+                types.Square(..square, selected: False, targeted: False),
+              )
+            board.Board(squares: new_squares)
+          },
+        )
       let assert Ok(square) = map.get(model.squares, index)
       let new_square = case square.highlighted {
         True -> {
@@ -39,16 +53,42 @@ fn update(model: board.Board, msg) {
       let new_squares = map.insert(model.squares, index, new_square)
       board.Board(squares: new_squares)
     }
-    LeftClick(_index) -> {
+    LeftClick(index) -> {
+      let destinations = case map.get(model.squares, index) {
+        Ok(square) -> {
+          case square.moves_to_play {
+            None -> []
+            Some(moves) -> {
+              moves.moves
+            }
+          }
+        }
+        Error(_) -> []
+      }
       map.fold(
         model.squares,
         model,
-        fn(model, index, square) {
+        fn(model, square_index, square) {
+          let selected = case #(index == square_index, square.player_piece) {
+            #(True, Some(_)) -> True
+            _ -> False
+          }
+          let targeted = case
+            list.contains(destinations, types.position_from_int(square_index))
+          {
+            True -> True
+            False -> False
+          }
           let new_squares =
             map.insert(
               model.squares,
-              index,
-              types.Square(..square, highlighted: False),
+              square_index,
+              types.Square(
+                ..square,
+                highlighted: False,
+                selected: selected,
+                targeted: targeted,
+              ),
             )
           board.Board(squares: new_squares)
         },
@@ -86,6 +126,16 @@ fn draw_board(model: board.Board) {
               True ->
                 attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
               False -> attribute.style([#("border-color", square_color)])
+            },
+            case square.selected {
+              True ->
+                attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
+              False -> attribute.style([])
+            },
+            case square.targeted {
+              True ->
+                attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
+              False -> attribute.style([])
             },
             event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
             event.on("click", fn(_) { Ok(LeftClick(index)) }),
