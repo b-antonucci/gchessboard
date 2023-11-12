@@ -65,34 +65,64 @@ fn update(model: board.Board, msg) {
         }
         Error(_) -> []
       }
-      map.fold(
-        model.squares,
-        model,
-        fn(model, square_index, square) {
-          let selected = case #(index == square_index, square.player_piece) {
-            #(True, Some(_)) -> True
-            _ -> False
-          }
-          let targeted = case
-            list.contains(destinations, types.position_from_int(square_index))
-          {
-            True -> True
-            False -> False
-          }
-          let new_squares =
-            map.insert(
-              model.squares,
-              square_index,
-              types.Square(
-                ..square,
-                highlighted: False,
-                selected: selected,
-                targeted: targeted,
-              ),
-            )
-          board.Board(squares: new_squares)
-        },
-      )
+      let assert Ok(left_clicked_square) = map.get(model.squares, index)
+      case left_clicked_square.selected {
+        True -> {
+          map.fold(
+            model.squares,
+            model,
+            fn(model, square_index, square) {
+              let new_squares =
+                map.insert(
+                  model.squares,
+                  square_index,
+                  types.Square(
+                    ..square,
+                    highlighted: False,
+                    selected: False,
+                    targeted: False,
+                  ),
+                )
+              board.Board(squares: new_squares)
+            },
+          )
+        }
+        False -> {
+          map.fold(
+            model.squares,
+            model,
+            fn(model, square_index, square) {
+              let selected = case
+                #(index == square_index, square.player_piece)
+              {
+                #(True, Some(_)) -> True
+                _ -> False
+              }
+              let targeted = case
+                list.contains(
+                  destinations,
+                  types.position_from_int(square_index),
+                )
+              {
+                True -> True
+                False -> False
+              }
+              let new_squares =
+                map.insert(
+                  model.squares,
+                  square_index,
+                  types.Square(
+                    ..square,
+                    highlighted: False,
+                    selected: selected,
+                    targeted: targeted,
+                  ),
+                )
+              board.Board(squares: new_squares)
+            },
+          )
+        }
+      }
     }
   }
 }

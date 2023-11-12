@@ -1,5 +1,4 @@
 import gleam/option.{type Option}
-import gleam/map.{type Map}
 import file.{type File}
 import rank.{type Rank}
 
