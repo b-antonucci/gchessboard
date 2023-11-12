@@ -1,4 +1,4 @@
-import types.{type Square}
+import types.{type Player, type Square}
 import rank.{type Rank, Eight, Five, Four, One, Seven, Six, Three, Two}
 import file.{type File, A, B, C, D, E, F, G, H}
 import gleam/map.{type Map}
@@ -19,42 +19,7 @@ const list_of_ranks: List(Rank) = [
 ]
 
 pub type Board {
-  Board(squares: Map(Int, Square))
-}
-
-pub fn new_board() -> Board {
-  let list_of_int_index: List(Int) = range(0, 63)
-
-  let squares =
-    list.fold(
-      list_of_int_index,
-      map.new(),
-      fn(map, index) {
-        map
-        |> map.insert(
-          index,
-          types.Square(
-            position: types.Position(
-              file: {
-                let assert Ok(file) = list.at(list_of_files, index % 8)
-                file
-              },
-              rank: {
-                let assert Ok(rank) = list.at(list_of_ranks, index / 8)
-                rank
-              },
-            ),
-            player_piece: None,
-            moves_to_play: None,
-            highlighted: False,
-            selected: False,
-            targeted: False,
-          ),
-        )
-      },
-    )
-
-  Board(squares)
+  Board(squares: Map(Int, Square), perspective: Player)
 }
 
 const list_of_starting_position_moves = [
@@ -206,121 +171,21 @@ const list_of_starting_position_moves = [
   #(45, None),
   #(46, None),
   #(47, None),
-  #(
-    48,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: A, rank: Six),
-          types.Position(file: A, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    49,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: B, rank: Six),
-          types.Position(file: B, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    50,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: C, rank: Six),
-          types.Position(file: C, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    51,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: D, rank: Six),
-          types.Position(file: D, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    52,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: E, rank: Six),
-          types.Position(file: E, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    53,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: F, rank: Six),
-          types.Position(file: F, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    54,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: G, rank: Six),
-          types.Position(file: G, rank: Five),
-        ],
-      ),
-    ),
-  ),
-  #(
-    55,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: H, rank: Six),
-          types.Position(file: H, rank: Five),
-        ],
-      ),
-    ),
-  ),
+  #(48, None),
+  #(49, None),
+  #(50, None),
+  #(51, None),
+  #(52, None),
+  #(53, None),
+  #(54, None),
+  #(55, None),
   #(56, None),
-  #(
-    57,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: A, rank: Six),
-          types.Position(file: C, rank: Six),
-        ],
-      ),
-    ),
-  ),
+  #(57, None),
   #(58, None),
   #(59, None),
   #(60, None),
   #(61, None),
-  #(
-    62,
-    Some(
-      types.Moves(
-        moves: [
-          types.Position(file: F, rank: Six),
-          types.Position(file: H, rank: Six),
-        ],
-      ),
-    ),
-  ),
+  #(62, None),
   #(63, None),
 ]
 
@@ -651,5 +516,5 @@ pub fn starting_position_board() -> Board {
       },
     )
 
-  Board(squares)
+  Board(squares, types.White)
 }

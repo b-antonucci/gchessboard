@@ -38,7 +38,7 @@ fn update(model: board.Board, msg) {
                 square_index,
                 types.Square(..square, selected: False, targeted: False),
               )
-            board.Board(squares: new_squares)
+            board.Board(..model, squares: new_squares)
           },
         )
       let assert Ok(square) = map.get(model.squares, index)
@@ -51,7 +51,7 @@ fn update(model: board.Board, msg) {
         }
       }
       let new_squares = map.insert(model.squares, index, new_square)
-      board.Board(squares: new_squares)
+      board.Board(..model, squares: new_squares)
     }
     LeftClick(index) -> {
       let destinations = case map.get(model.squares, index) {
@@ -83,7 +83,7 @@ fn update(model: board.Board, msg) {
                     targeted: False,
                   ),
                 )
-              board.Board(squares: new_squares)
+              board.Board(..model, squares: new_squares)
             },
           )
         }
@@ -95,7 +95,8 @@ fn update(model: board.Board, msg) {
               let selected = case
                 #(index == square_index, square.player_piece)
               {
-                #(True, Some(_)) -> True
+                #(True, Some(player_piece)) if player_piece.player == model.perspective ->
+                  True
                 _ -> False
               }
               let targeted = case
@@ -118,7 +119,7 @@ fn update(model: board.Board, msg) {
                     targeted: targeted,
                   ),
                 )
-              board.Board(squares: new_squares)
+              board.Board(..model, squares: new_squares)
             },
           )
         }
