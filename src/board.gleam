@@ -2,8 +2,8 @@ import types.{type Player, type Square}
 import rank.{type Rank, Eight, Five, Four, One, Seven, Six, Three, Two}
 import file.{type File, A, B, C, D, E, F, G, H}
 import gleam/map.{type Map}
-import gleam/option.{None, Some}
-import gleam/list.{range}
+import gleam/option.{type Option, None, Some}
+import gleam/list
 
 const list_of_files: List(File) = [A, B, C, D, E, F, G, H]
 
@@ -19,7 +19,11 @@ const list_of_ranks: List(Rank) = [
 ]
 
 pub type Board {
-  Board(squares: Map(Int, Square), perspective: Player)
+  Board(
+    squares: Map(Int, Square),
+    perspective: Player,
+    selected_square: Option(Square),
+  )
 }
 
 const list_of_starting_position_moves = [
@@ -516,5 +520,5 @@ pub fn starting_position_board() -> Board {
       },
     )
 
-  Board(squares, types.White)
+  Board(squares, types.White, None)
 }

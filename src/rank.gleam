@@ -21,3 +21,16 @@ pub fn from_int(i: Int) -> Rank {
     7 -> Eight
   }
 }
+
+pub fn to_int(r: Rank) -> Int {
+  case r {
+    One -> 0
+    Two -> 1
+    Three -> 2
+    Four -> 3
+    Five -> 4
+    Six -> 5
+    Seven -> 6
+    Eight -> 7
+  }
+}

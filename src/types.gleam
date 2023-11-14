@@ -30,6 +30,12 @@ pub fn position_from_int(index: Int) -> Position {
   Position(file, rank)
 }
 
+pub fn position_to_int(position: Position) -> Int {
+  let file = file.to_int(position.file)
+  let rank = rank.to_int(position.rank)
+  rank * 8 + file
+}
+
 pub type PlayerInfo {
   PlayerInfo(can_castle: Bool, in_check: Bool, king_position: Position)
 }
