@@ -36,8 +36,23 @@ pub fn position_to_int(position: Position) -> Int {
   rank * 8 + file
 }
 
-pub type PlayerInfo {
-  PlayerInfo(can_castle: Bool, in_check: Bool, king_position: Position)
+pub type Castling {
+  KingSide
+  QueenSide
+}
+
+pub type MoveData {
+  MoveData(
+    player: Player,
+    player_piece: PlayerPiece,
+    move_type: MoveType,
+    from: Position,
+    to: Position,
+    captured_piece: Option(PlayerPiece),
+    en_passant: Option(Position),
+    promotion: Option(Piece),
+    castling: Option(Castling),
+  )
 }
 
 pub type MoveType {
@@ -59,6 +74,8 @@ pub type Square {
     position: Position,
     player_piece: Option(PlayerPiece),
     moves_to_play: Option(Moves),
+    // TODO: i should combine these into enum
+    //       since they are mutually exclusive
     highlighted: Bool,
     selected: Bool,
     targeted: Bool,

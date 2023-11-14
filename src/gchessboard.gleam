@@ -148,7 +148,7 @@ fn update(model: board.Board, msg) {
                   let selected = case
                     #(index == square_index, square.player_piece)
                   {
-                    #(True, Some(player_piece)) if player_piece.player == model.perspective ->
+                    #(True, Some(player_piece)) if player_piece.player == model.moveable.player ->
                       True
                     _ -> False
                   }

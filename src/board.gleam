@@ -18,10 +18,14 @@ const list_of_ranks: List(Rank) = [
   Eight,
 ]
 
+pub type Moveable {
+  Moveable(player: Player, after: Option(fn(types.MoveData) -> Nil))
+}
+
 pub type Board {
   Board(
     squares: Map(Int, Square),
-    perspective: Player,
+    moveable: Moveable,
     selected_square: Option(Square),
   )
 }
@@ -520,5 +524,7 @@ pub fn starting_position_board() -> Board {
       },
     )
 
-  Board(squares, types.White, None)
+  let moveable = Moveable(player: types.White, after: None)
+
+  Board(squares, moveable, None)
 }
