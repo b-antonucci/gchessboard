@@ -27,6 +27,7 @@ fn init(_) {
 type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
+  // Set(config: Config)
 }
 
 fn update(model: state.State, msg) {
