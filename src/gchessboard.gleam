@@ -1,5 +1,6 @@
 import lustre
 import lustre/event
+import lustre/effect
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
 import state
@@ -10,15 +11,17 @@ import gleam/list.{range}
 import gleam/map
 import gleam/option.{None, Some}
 
-pub fn main() {
-  let app = lustre.simple(init, update, view)
-  let assert Ok(_) = lustre.start(app, "[data-lustre-app]", Nil)
+@external(javascript, "./ffi.js", "alert")
+pub fn alert() -> Nil
 
+pub fn main() {
+  let app = lustre.application(init, update, view)
+  let assert Ok(_interface) = lustre.start(app, "[data-lustre-app]", Nil)
   Nil
 }
 
 fn init(_) {
-  state.starting_position_board()
+  #(state.starting_position_board(), effect.none())
 }
 
 type Msg {
@@ -27,7 +30,7 @@ type Msg {
 }
 
 fn update(model: state.State, msg) {
-  case msg {
+  let new_state = case msg {
     RightClick(index) -> {
       let model =
         map.fold(
@@ -177,6 +180,7 @@ fn update(model: state.State, msg) {
       }
     }
   }
+  #(new_state, effect.none())
 }
 
 const color_order = [
@@ -302,7 +306,7 @@ fn draw_board(model: state.State) {
 
 fn view(model: state.State) {
   div(
-    [id("gameBoardBorder"), property("oncontextmenu", "return false;")],
+    [id("chessboard"), property("oncontextmenu", "return false;")],
     draw_board(model),
   )
 }
