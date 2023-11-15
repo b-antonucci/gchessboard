@@ -1,4 +1,6 @@
-import types.{type Player, type Square}
+import types.{type Player}
+import square.{type Square}
+import position.{type Position, Position}
 import rank.{type Rank, Eight, Five, Four, One, Seven, Six, Three, Two}
 import file.{type File, A, B, C, D, E, F, G, H}
 import gleam/map.{type Map}
@@ -22,8 +24,8 @@ pub type Moveable {
   Moveable(player: Player, after: Option(fn(types.MoveData) -> Nil))
 }
 
-pub type Board {
-  Board(
+pub type State {
+  State(
     squares: Map(Int, Square),
     moveable: Moveable,
     selected_square: Option(Square),
@@ -36,10 +38,7 @@ const list_of_starting_position_moves = [
     1,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: A, rank: Three),
-          types.Position(file: C, rank: Three),
-        ],
+        moves: [Position(file: A, rank: Three), Position(file: C, rank: Three)],
       ),
     ),
   ),
@@ -51,10 +50,7 @@ const list_of_starting_position_moves = [
     6,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: F, rank: Three),
-          types.Position(file: H, rank: Three),
-        ],
+        moves: [Position(file: F, rank: Three), Position(file: H, rank: Three)],
       ),
     ),
   ),
@@ -63,10 +59,7 @@ const list_of_starting_position_moves = [
     8,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: A, rank: Three),
-          types.Position(file: A, rank: Four),
-        ],
+        moves: [Position(file: A, rank: Three), Position(file: A, rank: Four)],
       ),
     ),
   ),
@@ -74,10 +67,7 @@ const list_of_starting_position_moves = [
     9,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: B, rank: Three),
-          types.Position(file: B, rank: Four),
-        ],
+        moves: [Position(file: B, rank: Three), Position(file: B, rank: Four)],
       ),
     ),
   ),
@@ -85,10 +75,7 @@ const list_of_starting_position_moves = [
     10,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: C, rank: Three),
-          types.Position(file: C, rank: Four),
-        ],
+        moves: [Position(file: C, rank: Three), Position(file: C, rank: Four)],
       ),
     ),
   ),
@@ -96,10 +83,7 @@ const list_of_starting_position_moves = [
     11,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: D, rank: Three),
-          types.Position(file: D, rank: Four),
-        ],
+        moves: [Position(file: D, rank: Three), Position(file: D, rank: Four)],
       ),
     ),
   ),
@@ -107,10 +91,7 @@ const list_of_starting_position_moves = [
     12,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: E, rank: Three),
-          types.Position(file: E, rank: Four),
-        ],
+        moves: [Position(file: E, rank: Three), Position(file: E, rank: Four)],
       ),
     ),
   ),
@@ -118,10 +99,7 @@ const list_of_starting_position_moves = [
     13,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: F, rank: Three),
-          types.Position(file: F, rank: Four),
-        ],
+        moves: [Position(file: F, rank: Three), Position(file: F, rank: Four)],
       ),
     ),
   ),
@@ -129,10 +107,7 @@ const list_of_starting_position_moves = [
     14,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: G, rank: Three),
-          types.Position(file: G, rank: Four),
-        ],
+        moves: [Position(file: G, rank: Three), Position(file: G, rank: Four)],
       ),
     ),
   ),
@@ -140,10 +115,7 @@ const list_of_starting_position_moves = [
     15,
     Some(
       types.Moves(
-        moves: [
-          types.Position(file: H, rank: Three),
-          types.Position(file: H, rank: Four),
-        ],
+        moves: [Position(file: H, rank: Three), Position(file: H, rank: Four)],
       ),
     ),
   ),
@@ -197,7 +169,7 @@ const list_of_starting_position_moves = [
   #(63, None),
 ]
 
-pub fn starting_position_board() -> Board {
+pub fn starting_position_board() -> State {
   let map_of_starting_position_moves =
     map.from_list(list_of_starting_position_moves)
   let list_of_pieces: List(#(Int, option.Option(types.PlayerPiece))) = [
@@ -501,8 +473,8 @@ pub fn starting_position_board() -> Board {
         map
         |> map.insert(
           index_and_piece.0,
-          types.Square(
-            position: types.Position(
+          square.Square(
+            position: Position(
               file: {
                 let assert Ok(file) =
                   list.at(list_of_files, index_and_piece.0 % 8)
@@ -516,9 +488,7 @@ pub fn starting_position_board() -> Board {
             ),
             player_piece: index_and_piece.1,
             moves_to_play: moves_to_play,
-            highlighted: False,
-            selected: False,
-            targeted: False,
+            status: None,
           ),
         )
       },
@@ -526,5 +496,5 @@ pub fn starting_position_board() -> Board {
 
   let moveable = Moveable(player: types.White, after: None)
 
-  Board(squares, moveable, None)
+  State(squares, moveable, None)
 }

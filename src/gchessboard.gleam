@@ -2,8 +2,10 @@ import lustre
 import lustre/event
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
-import board
+import state
 import types
+import square
+import position.{from_int, to_int}
 import gleam/list.{range}
 import gleam/map
 import gleam/option.{None, Some}
@@ -16,7 +18,7 @@ pub fn main() {
 }
 
 fn init(_) {
-  board.starting_position_board()
+  state.starting_position_board()
 }
 
 type Msg {
@@ -24,7 +26,7 @@ type Msg {
   LeftClick(index: Int)
 }
 
-fn update(model: board.Board, msg) {
+fn update(model: state.State, msg) {
   case msg {
     RightClick(index) -> {
       let model =
@@ -32,31 +34,35 @@ fn update(model: board.Board, msg) {
           model.squares,
           model,
           fn(model, square_index, square) {
-            let new_squares =
-              map.insert(
-                model.squares,
-                square_index,
-                types.Square(..square, selected: False, targeted: False),
-              )
-            board.Board(..model, squares: new_squares)
+            let new_squares = case square.status {
+              None | Some(square.Highlighted) -> model.squares
+              Some(square.Selected) | Some(square.Targeted) -> {
+                map.insert(
+                  model.squares,
+                  square_index,
+                  square.Square(..square, status: None),
+                )
+              }
+            }
+            state.State(..model, squares: new_squares)
           },
         )
       let assert Ok(square) = map.get(model.squares, index)
-      let new_square = case square.highlighted {
-        True -> {
-          types.Square(..square, highlighted: False)
+      let new_square = case square.status {
+        Some(square.Highlighted) -> {
+          square.Square(..square, status: None)
         }
-        False -> {
-          types.Square(..square, highlighted: True)
+        _ -> {
+          square.Square(..square, status: Some(square.Highlighted))
         }
       }
       let new_squares = map.insert(model.squares, index, new_square)
-      board.Board(..model, squares: new_squares)
+      state.State(..model, squares: new_squares)
     }
     LeftClick(index) -> {
       let assert Ok(left_clicked_square) = map.get(model.squares, index)
-      case left_clicked_square.selected {
-        True -> {
+      case left_clicked_square.status {
+        Some(square.Selected) -> {
           map.fold(
             model.squares,
             model,
@@ -65,125 +71,108 @@ fn update(model: board.Board, msg) {
                 map.insert(
                   model.squares,
                   square_index,
-                  types.Square(
-                    ..square,
-                    highlighted: False,
-                    selected: False,
-                    targeted: False,
-                  ),
+                  square.Square(..square, status: None),
                 )
-              board.Board(..model, squares: new_squares)
+              state.State(..model, squares: new_squares)
             },
           )
         }
-        False -> {
-          case left_clicked_square.targeted {
-            True -> {
-              map.fold(
-                model.squares,
-                model,
-                fn(model, square_index, square) {
-                  let new_squares = case square_index == index {
-                    True -> {
-                      let assert Some(origin_square) = model.selected_square
+        Some(square.Targeted) -> {
+          map.fold(
+            model.squares,
+            model,
+            fn(model, square_index, square) {
+              let new_squares = case square_index == index {
+                True -> {
+                  let assert Some(origin_square) = model.selected_square
 
-                      let player_piece = origin_square.player_piece
-                      map.insert(
-                        model.squares,
-                        square_index,
-                        types.Square(
-                          ..square,
-                          moves_to_play: None,
-                          highlighted: False,
-                          selected: False,
-                          targeted: False,
-                          player_piece: player_piece,
-                        ),
-                      )
-                    }
-                    False -> {
-                      let assert Some(origin_square) = model.selected_square
-                      let player_piece = case
-                        square_index == types.position_to_int(
-                          origin_square.position,
-                        )
-                      {
-                        True -> None
-                        False -> square.player_piece
-                      }
-                      map.insert(
-                        model.squares,
-                        square_index,
-                        types.Square(
-                          ..square,
-                          moves_to_play: None,
-                          player_piece: player_piece,
-                          highlighted: False,
-                          selected: False,
-                          targeted: False,
-                        ),
-                      )
-                    }
-                  }
-                  board.Board(..model, squares: new_squares)
-                },
-              )
-            }
-            False -> {
-              let destinations = case map.get(model.squares, index) {
-                Ok(square) -> {
-                  case square.moves_to_play {
-                    None -> []
-                    Some(moves) -> {
-                      moves.moves
-                    }
-                  }
+                  let player_piece = origin_square.player_piece
+                  map.insert(
+                    model.squares,
+                    square_index,
+                    square.Square(
+                      ..square,
+                      moves_to_play: None,
+                      status: None,
+                      player_piece: player_piece,
+                    ),
+                  )
                 }
-                Error(_) -> []
-              }
-              map.fold(
-                model.squares,
-                model,
-                fn(model, square_index, square) {
-                  let selected = case
-                    #(index == square_index, square.player_piece)
+                False -> {
+                  let assert Some(origin_square) = model.selected_square
+                  let player_piece = case
+                    square_index == to_int(origin_square.position)
                   {
-                    #(True, Some(player_piece)) if player_piece.player == model.moveable.player ->
-                      True
-                    _ -> False
+                    True -> None
+                    False -> square.player_piece
                   }
-                  let targeted =
-                    list.contains(
-                      destinations,
-                      types.position_from_int(square_index),
-                    )
-                  let new_squares =
-                    map.insert(
-                      model.squares,
-                      square_index,
-                      types.Square(
-                        ..square,
-                        highlighted: False,
-                        selected: selected,
-                        targeted: targeted,
-                      ),
-                    )
-                  case selected {
-                    True -> {
-                      board.Board(
-                        ..model,
-                        squares: new_squares,
-                        selected_square: Some(square),
-                      )
-                    }
-                    False -> {
-                      board.Board(..model, squares: new_squares)
-                    }
-                  }
-                },
-              )
+                  map.insert(
+                    model.squares,
+                    square_index,
+                    square.Square(
+                      ..square,
+                      moves_to_play: None,
+                      player_piece: player_piece,
+                      status: None,
+                    ),
+                  )
+                }
+              }
+              state.State(..model, squares: new_squares)
+            },
+          )
+        }
+        _ -> {
+          let destinations = case map.get(model.squares, index) {
+            Ok(square) -> {
+              case square.moves_to_play {
+                None -> []
+                Some(moves) -> {
+                  moves.moves
+                }
+              }
             }
+            Error(_) -> []
           }
+          map.fold(
+            model.squares,
+            model,
+            fn(model, square_index, square) {
+              let selected = case
+                #(index == square_index, square.player_piece)
+              {
+                #(True, Some(player_piece)) if player_piece.player == model.moveable.player ->
+                  True
+                _ -> False
+              }
+              let targeted = list.contains(destinations, from_int(square_index))
+
+              let status = case #(selected, targeted) {
+                #(True, _) -> Some(square.Selected)
+                #(False, True) -> Some(square.Targeted)
+                #(False, False) -> None
+                #(True, True) -> panic("This should never happen")
+              }
+              let new_squares =
+                map.insert(
+                  model.squares,
+                  square_index,
+                  square.Square(..square, status: status),
+                )
+              case selected {
+                True -> {
+                  state.State(
+                    ..model,
+                    squares: new_squares,
+                    selected_square: Some(square),
+                  )
+                }
+                False -> {
+                  state.State(..model, squares: new_squares)
+                }
+              }
+            },
+          )
         }
       }
     }
@@ -197,7 +186,7 @@ const color_order = [
   "whiteSquare", "blackSquare", "whiteSquare", "blackSquare", "whiteSquare",
 ]
 
-fn draw_board(model: board.Board) {
+fn draw_board(model: state.State) {
   let list_of_int_index: List(Int) = range(0, 63)
 
   list.fold(
@@ -215,20 +204,10 @@ fn draw_board(model: board.Board) {
         div(
           [
             class(class_name),
-            case square.highlighted {
-              True ->
+            case square.status {
+              Some(_) ->
                 attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
-              False -> attribute.style([#("border-color", square_color)])
-            },
-            case square.selected {
-              True ->
-                attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
-              False -> attribute.style([])
-            },
-            case square.targeted {
-              True ->
-                attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
-              False -> attribute.style([])
+              None -> attribute.style([#("border-color", square_color)])
             },
             event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
             event.on("click", fn(_) { Ok(LeftClick(index)) }),
@@ -321,7 +300,7 @@ fn draw_board(model: board.Board) {
   )
 }
 
-fn view(model: board.Board) {
+fn view(model: state.State) {
   div(
     [id("gameBoardBorder"), property("oncontextmenu", "return false;")],
     draw_board(model),
