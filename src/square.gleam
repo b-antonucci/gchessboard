@@ -1,4 +1,4 @@
-import types.{type Moves, type PlayerPiece}
+import types.{type Destinations, type PlayerPiece}
 import position.{type Position}
 import gleam/option.{type Option}
 
@@ -12,7 +12,7 @@ pub type Square {
   Square(
     position: Position,
     player_piece: Option(PlayerPiece),
-    moves_to_play: Option(Moves),
+    moves_to_play: Option(Destinations),
     status: Option(Status),
   )
 }

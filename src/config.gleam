@@ -1,10 +1,14 @@
-import types.{type Player}
+import types.{type Moves, type Player}
 import gleam/option.{type Option}
 
 pub type Config {
-  Config(Option(Moveable), Option(Nil))
+  Config(moveable: Option(Moveable))
 }
 
 pub type Moveable {
-  Moveable(player: Option(Player), after: Option(fn(types.MoveData) -> Nil))
+  Moveable(
+    player: Option(Player),
+    moves: Option(Moves),
+    after: Option(fn(types.MoveData) -> Nil),
+  )
 }

@@ -1,4 +1,4 @@
-import types.{type Player}
+import types.{type Moves, type Player}
 import square.{type Square}
 import position.{type Position, Position}
 import rank.{type Rank, Eight, Five, Four, One, Seven, Six, Three, Two}
@@ -21,7 +21,11 @@ const list_of_ranks: List(Rank) = [
 ]
 
 pub type Moveable {
-  Moveable(player: Player, after: Option(fn(types.MoveData) -> Nil))
+  Moveable(
+    player: Player,
+    moves: Option(Moves),
+    after: Option(fn(types.MoveData) -> Nil),
+  )
 }
 
 pub type State {
@@ -32,142 +36,118 @@ pub type State {
   )
 }
 
-const list_of_starting_position_moves = [
-  #(0, None),
-  #(
-    1,
-    Some(
-      types.Moves(
-        moves: [Position(file: A, rank: Three), Position(file: C, rank: Three)],
-      ),
-    ),
-  ),
-  #(2, None),
-  #(3, None),
-  #(4, None),
-  #(5, None),
-  #(
-    6,
-    Some(
-      types.Moves(
-        moves: [Position(file: F, rank: Three), Position(file: H, rank: Three)],
-      ),
-    ),
-  ),
-  #(7, None),
-  #(
-    8,
-    Some(
-      types.Moves(
-        moves: [Position(file: A, rank: Three), Position(file: A, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    9,
-    Some(
-      types.Moves(
-        moves: [Position(file: B, rank: Three), Position(file: B, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    10,
-    Some(
-      types.Moves(
-        moves: [Position(file: C, rank: Three), Position(file: C, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    11,
-    Some(
-      types.Moves(
-        moves: [Position(file: D, rank: Three), Position(file: D, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    12,
-    Some(
-      types.Moves(
-        moves: [Position(file: E, rank: Three), Position(file: E, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    13,
-    Some(
-      types.Moves(
-        moves: [Position(file: F, rank: Three), Position(file: F, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    14,
-    Some(
-      types.Moves(
-        moves: [Position(file: G, rank: Three), Position(file: G, rank: Four)],
-      ),
-    ),
-  ),
-  #(
-    15,
-    Some(
-      types.Moves(
-        moves: [Position(file: H, rank: Three), Position(file: H, rank: Four)],
-      ),
-    ),
-  ),
-  #(16, None),
-  #(17, None),
-  #(18, None),
-  #(19, None),
-  #(20, None),
-  #(21, None),
-  #(22, None),
-  #(23, None),
-  #(24, None),
-  #(25, None),
-  #(26, None),
-  #(27, None),
-  #(28, None),
-  #(29, None),
-  #(30, None),
-  #(31, None),
-  #(32, None),
-  #(33, None),
-  #(34, None),
-  #(35, None),
-  #(36, None),
-  #(37, None),
-  #(38, None),
-  #(39, None),
-  #(40, None),
-  #(41, None),
-  #(42, None),
-  #(43, None),
-  #(44, None),
-  #(45, None),
-  #(46, None),
-  #(47, None),
-  #(48, None),
-  #(49, None),
-  #(50, None),
-  #(51, None),
-  #(52, None),
-  #(53, None),
-  #(54, None),
-  #(55, None),
-  #(56, None),
-  #(57, None),
-  #(58, None),
-  #(59, None),
-  #(60, None),
-  #(61, None),
-  #(62, None),
-  #(63, None),
-]
+const list_of_starting_position_moves = []
+
+// #(
+//   Position(file: B, rank: One),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: A, rank: Three),
+//         Position(file: C, rank: Three),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: G, rank: One),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: F, rank: Three),
+//         Position(file: H, rank: Three),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: A, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: A, rank: Three),
+//         Position(file: A, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: B, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: B, rank: Three),
+//         Position(file: B, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: C, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: C, rank: Three),
+//         Position(file: C, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: D, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: D, rank: Three),
+//         Position(file: D, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: E, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: E, rank: Three),
+//         Position(file: E, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: F, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: F, rank: Three),
+//         Position(file: F, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: G, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: G, rank: Three),
+//         Position(file: G, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
+// #(
+//   Position(file: H, rank: Two),
+//   Some(
+//     types.Destinations(
+//       destinations: [
+//         Position(file: H, rank: Three),
+//         Position(file: H, rank: Four),
+//       ],
+//     ),
+//   ),
+// ),
 
 pub fn starting_position_board() -> State {
   let map_of_starting_position_moves =
@@ -468,33 +448,63 @@ pub fn starting_position_board() -> State {
       list_of_pieces,
       map.new(),
       fn(map, index_and_piece) {
-        let assert Ok(moves_to_play) =
-          map.get(map_of_starting_position_moves, index_and_piece.0)
-        map
-        |> map.insert(
-          index_and_piece.0,
-          square.Square(
-            position: Position(
-              file: {
-                let assert Ok(file) =
-                  list.at(list_of_files, index_and_piece.0 % 8)
-                file
-              },
-              rank: {
-                let assert Ok(rank) =
-                  list.at(list_of_ranks, index_and_piece.0 / 8)
-                rank
-              },
-            ),
-            player_piece: index_and_piece.1,
-            moves_to_play: moves_to_play,
-            status: None,
-          ),
-        )
+        case
+          map.get(
+            map_of_starting_position_moves,
+            position.from_int(index_and_piece.0),
+          )
+        {
+          Ok(moves_to_play) -> {
+            map
+            |> map.insert(
+              index_and_piece.0,
+              square.Square(
+                position: Position(
+                  file: {
+                    let assert Ok(file) =
+                      list.at(list_of_files, index_and_piece.0 % 8)
+                    file
+                  },
+                  rank: {
+                    let assert Ok(rank) =
+                      list.at(list_of_ranks, index_and_piece.0 / 8)
+                    rank
+                  },
+                ),
+                player_piece: index_and_piece.1,
+                moves_to_play: moves_to_play,
+                status: None,
+              ),
+            )
+          }
+          Error(_) -> {
+            map
+            |> map.insert(
+              index_and_piece.0,
+              square.Square(
+                position: Position(
+                  file: {
+                    let assert Ok(file) =
+                      list.at(list_of_files, index_and_piece.0 % 8)
+                    file
+                  },
+                  rank: {
+                    let assert Ok(rank) =
+                      list.at(list_of_ranks, index_and_piece.0 / 8)
+                    rank
+                  },
+                ),
+                player_piece: index_and_piece.1,
+                moves_to_play: None,
+                status: None,
+              ),
+            )
+          }
+        }
       },
     )
 
-  let moveable = Moveable(player: types.White, after: None)
+  let moveable = Moveable(player: types.White, moves: None, after: None)
 
   State(squares, moveable, None)
 }

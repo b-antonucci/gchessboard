@@ -4,9 +4,12 @@ import lustre/effect
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
 import state
+import position.{Position, from_int, to_int}
+import rank.{Four, One, Three, Two}
+import file.{A, B, C, D, E, F, G, H}
 import types
 import square
-import position.{from_int, to_int}
+import config.{type Config, Config}
 import gleam/list.{range}
 import gleam/map
 import gleam/option.{None, Some}
@@ -16,7 +19,88 @@ pub fn alert() -> Nil
 
 pub fn main() {
   let app = lustre.application(init, update, view)
-  let assert Ok(_interface) = lustre.start(app, "[data-lustre-app]", Nil)
+  let assert Ok(interface) = lustre.start(app, "[data-lustre-app]", Nil)
+
+  let config =
+    Config(moveable: Some(config.Moveable(
+      player: None,
+      after: None,
+      moves: Some(types.Moves(moves: [
+        #(
+          types.Origin(origin: Position(file: B, rank: One)),
+          types.Destinations(destinations: [
+            Position(file: A, rank: Three),
+            Position(file: C, rank: Three),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: G, rank: One)),
+          types.Destinations(destinations: [
+            Position(file: F, rank: Three),
+            Position(file: H, rank: Three),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: A, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: A, rank: Three),
+            Position(file: A, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: B, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: B, rank: Three),
+            Position(file: B, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: C, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: C, rank: Three),
+            Position(file: C, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: D, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: D, rank: Three),
+            Position(file: D, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: E, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: E, rank: Three),
+            Position(file: E, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: F, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: F, rank: Three),
+            Position(file: F, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: G, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: G, rank: Three),
+            Position(file: G, rank: Four),
+          ]),
+        ),
+        #(
+          types.Origin(origin: Position(file: H, rank: Two)),
+          types.Destinations(destinations: [
+            Position(file: H, rank: Three),
+            Position(file: H, rank: Four),
+          ]),
+        ),
+      ])),
+    )))
+
+  interface(Set(config))
+
   Nil
 }
 
@@ -27,11 +111,73 @@ fn init(_) {
 type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
-  // Set(config: Config)
+  Set(config: Config)
 }
 
 fn update(model: state.State, msg) {
   let new_state = case msg {
+    Set(config) -> {
+      let #(new_model, new_moves) = case config.moveable {
+        None -> {
+          #(model, None)
+        }
+        Some(config_moveable) -> {
+          let new_player = case config_moveable.player {
+            Some(types.White) -> types.White
+            Some(types.Black) -> types.Black
+            None -> model.moveable.player
+          }
+          let new_after = case config_moveable.after {
+            Some(after) -> Some(after)
+            None -> model.moveable.after
+          }
+          let new_moves = case config_moveable.moves {
+            Some(moves) -> Some(moves)
+            None -> model.moveable.moves
+          }
+          #(
+            state.State(
+              ..model,
+              moveable: state.Moveable(
+                player: new_player,
+                moves: new_moves,
+                after: new_after,
+              ),
+            ),
+            new_moves,
+          )
+        }
+      }
+      let new_model = case new_moves {
+        None -> new_model
+        Some(moves) -> {
+          let map_of_moves = map.from_list(moves.moves)
+          let new_model =
+            map.fold(
+              model.squares,
+              model,
+              fn(model, square_index, square) {
+                let new_moves_to_play = case
+                  map.get(
+                    map_of_moves,
+                    types.Origin(origin: position.from_int(square_index)),
+                  )
+                {
+                  Ok(moves) -> Some(moves)
+                  Error(_) -> None
+                }
+                let new_square =
+                  square.Square(..square, moves_to_play: new_moves_to_play)
+                let new_squares =
+                  map.insert(model.squares, square_index, new_square)
+                state.State(..model, squares: new_squares)
+              },
+            )
+          new_model
+        }
+      }
+      new_model
+    }
     RightClick(index) -> {
       let model =
         map.fold(
@@ -132,7 +278,7 @@ fn update(model: state.State, msg) {
               case square.moves_to_play {
                 None -> []
                 Some(moves) -> {
-                  moves.moves
+                  moves.destinations
                 }
               }
             }

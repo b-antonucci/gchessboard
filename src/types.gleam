@@ -48,6 +48,14 @@ pub type MoveType {
   Promotion
 }
 
+pub type Destinations {
+  Destinations(destinations: List(Position))
+}
+
+pub type Origin {
+  Origin(origin: Position)
+}
+
 pub type Moves {
-  Moves(moves: List(Position))
+  Moves(moves: List(#(Origin, Destinations)))
 }
