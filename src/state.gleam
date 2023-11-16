@@ -28,126 +28,24 @@ pub type Moveable {
   )
 }
 
+pub type ClickMode {
+  RightClick(highlighted: List(Position))
+  LeftClick(selected: Option(Position), targeted: List(Position))
+}
+
 pub type State {
   State(
+    // TODO: pieces: Map(Int, types.PlayerPiece),
+    // TODO: click_mode: ClickMode,
+    // TODO: moves: Moves,
     squares: Map(Int, Square),
+    // TODO: replace squares
     moveable: Moveable,
     selected_square: Option(Square),
   )
 }
 
 const list_of_starting_position_moves = []
-
-// #(
-//   Position(file: B, rank: One),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: A, rank: Three),
-//         Position(file: C, rank: Three),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: G, rank: One),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: F, rank: Three),
-//         Position(file: H, rank: Three),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: A, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: A, rank: Three),
-//         Position(file: A, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: B, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: B, rank: Three),
-//         Position(file: B, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: C, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: C, rank: Three),
-//         Position(file: C, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: D, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: D, rank: Three),
-//         Position(file: D, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: E, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: E, rank: Three),
-//         Position(file: E, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: F, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: F, rank: Three),
-//         Position(file: F, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: G, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: G, rank: Three),
-//         Position(file: G, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
-// #(
-//   Position(file: H, rank: Two),
-//   Some(
-//     types.Destinations(
-//       destinations: [
-//         Position(file: H, rank: Three),
-//         Position(file: H, rank: Four),
-//       ],
-//     ),
-//   ),
-// ),
 
 pub fn starting_position_board() -> State {
   let map_of_starting_position_moves =
