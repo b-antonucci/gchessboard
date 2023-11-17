@@ -3,12 +3,11 @@ import lustre/event
 import lustre/effect
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
-import state
+import state.{type State, LeftClickMode, RightClickMode, State}
 import position.{Position, from_int, to_int}
 import rank.{Four, One, Three, Two}
 import file.{A, B, C, D, E, F, G, H}
-import types
-import square
+import types.{Origin}
 import config.{type Config, Config}
 import gleam/list.{range}
 import gleam/map
@@ -117,14 +116,15 @@ type Msg {
 fn update(model: state.State, msg) {
   let new_state = case msg {
     Set(config) -> {
-      let #(new_model, new_moves) = case config.moveable {
+      let new_model = case config.moveable {
         None -> {
-          #(model, None)
+          model
         }
         Some(config_moveable) -> {
           let new_player = case config_moveable.player {
-            Some(types.White) -> types.White
-            Some(types.Black) -> types.Black
+            Some(types.White) -> Some(types.White)
+            Some(types.Black) -> Some(types.Black)
+            Some(types.Both) -> Some(types.Both)
             None -> model.moveable.player
           }
           let new_after = case config_moveable.after {
@@ -135,198 +135,208 @@ fn update(model: state.State, msg) {
             Some(moves) -> Some(moves)
             None -> model.moveable.moves
           }
-          #(
-            state.State(
-              ..model,
-              moveable: state.Moveable(
-                player: new_player,
-                moves: new_moves,
-                after: new_after,
-              ),
+          state.State(
+            ..model,
+            moveable: state.Moveable(
+              player: new_player,
+              moves: new_moves,
+              after: new_after,
             ),
-            new_moves,
           )
-        }
-      }
-      let new_model = case new_moves {
-        None -> new_model
-        Some(moves) -> {
-          let map_of_moves = map.from_list(moves.moves)
-          let new_model =
-            map.fold(
-              model.squares,
-              model,
-              fn(model, square_index, square) {
-                let new_moves_to_play = case
-                  map.get(
-                    map_of_moves,
-                    types.Origin(origin: position.from_int(square_index)),
-                  )
-                {
-                  Ok(moves) -> Some(moves)
-                  Error(_) -> None
-                }
-                let new_square =
-                  square.Square(..square, moves_to_play: new_moves_to_play)
-                let new_squares =
-                  map.insert(model.squares, square_index, new_square)
-                state.State(..model, squares: new_squares)
-              },
-            )
-          new_model
         }
       }
       new_model
     }
     RightClick(index) -> {
-      let model =
-        map.fold(
-          model.squares,
-          model,
-          fn(model, square_index, square) {
-            let new_squares = case square.status {
-              None | Some(square.Highlighted) -> model.squares
-              Some(square.Selected) | Some(square.Targeted) -> {
-                map.insert(
-                  model.squares,
-                  square_index,
-                  square.Square(..square, status: None),
-                )
-              }
-            }
-            state.State(..model, squares: new_squares)
-          },
-        )
-      let assert Ok(square) = map.get(model.squares, index)
-      let new_square = case square.status {
-        Some(square.Highlighted) -> {
-          square.Square(..square, status: None)
+      case model.click_mode {
+        RightClickMode(highlighted) -> {
+          let new_highlight = from_int(index)
+          let highlighted = [new_highlight, ..highlighted]
+          State(..model, click_mode: RightClickMode(highlighted))
         }
-        _ -> {
-          square.Square(..square, status: Some(square.Highlighted))
-        }
+        LeftClickMode(_, _) ->
+          State(..model, click_mode: RightClickMode([from_int(index)]))
       }
-      let new_squares = map.insert(model.squares, index, new_square)
-      state.State(..model, squares: new_squares)
     }
     LeftClick(index) -> {
-      let assert Ok(left_clicked_square) = map.get(model.squares, index)
-      case left_clicked_square.status {
-        Some(square.Selected) -> {
-          map.fold(
-            model.squares,
-            model,
-            fn(model, square_index, square) {
-              let new_squares =
-                map.insert(
-                  model.squares,
-                  square_index,
-                  square.Square(..square, status: None),
-                )
-              state.State(..model, squares: new_squares)
-            },
-          )
-        }
-        Some(square.Targeted) -> {
-          map.fold(
-            model.squares,
-            model,
-            fn(model, square_index, square) {
-              let new_squares = case square_index == index {
-                True -> {
-                  let assert Some(origin_square) = model.selected_square
-
-                  let player_piece = origin_square.player_piece
-                  map.insert(
-                    model.squares,
-                    square_index,
-                    square.Square(
-                      ..square,
-                      moves_to_play: None,
-                      status: None,
-                      player_piece: player_piece,
-                    ),
+      // TODO: add logic stopping move making after a move is made using turn field
+      case model.click_mode {
+        LeftClickMode(selected, targeted) -> {
+          case selected {
+            Some(selected_pos) -> {
+              case #(selected_pos == from_int(index), targeted) {
+                #(True, _) -> {
+                  let new_selected = None
+                  let new_targeted = []
+                  State(
+                    ..model,
+                    click_mode: LeftClickMode(new_selected, new_targeted),
                   )
                 }
-                False -> {
-                  let assert Some(origin_square) = model.selected_square
-                  let player_piece = case
-                    square_index == to_int(origin_square.position)
-                  {
-                    True -> None
-                    False -> square.player_piece
+                #(False, []) -> {
+                  let new_selected = Some(from_int(index))
+                  let new_targeted = case model.moveable.moves {
+                    None -> []
+                    Some(moves) -> {
+                      let maybe_moves =
+                        list.find(
+                          moves.moves,
+                          fn(move) { move.0 == Origin(origin: from_int(index)) },
+                        )
+                      case maybe_moves {
+                        Error(_) -> []
+                        Ok(moves) -> {
+                          let dests = moves.1
+                          dests.destinations
+                        }
+                      }
+                    }
                   }
-                  map.insert(
-                    model.squares,
-                    square_index,
-                    square.Square(
-                      ..square,
-                      moves_to_play: None,
-                      player_piece: player_piece,
-                      status: None,
-                    ),
+                  State(
+                    ..model,
+                    click_mode: LeftClickMode(new_selected, new_targeted),
                   )
                 }
-              }
-              state.State(..model, squares: new_squares)
-            },
-          )
-        }
-        _ -> {
-          let destinations = case map.get(model.squares, index) {
-            Ok(square) -> {
-              case square.moves_to_play {
-                None -> []
-                Some(moves) -> {
-                  moves.destinations
+                #(False, dests) -> {
+                  case list.contains(dests, from_int(index)) {
+                    False -> {
+                      let new_selected = Some(from_int(index))
+                      let new_targeted = case model.moveable.moves {
+                        None -> []
+                        Some(moves) -> {
+                          let maybe_moves =
+                            list.find(
+                              moves.moves,
+                              fn(move) {
+                                move.0 == Origin(origin: from_int(index))
+                              },
+                            )
+                          case maybe_moves {
+                            Error(_) -> []
+                            Ok(moves) -> {
+                              let dests = moves.1
+                              dests.destinations
+                            }
+                          }
+                        }
+                      }
+                      State(
+                        ..model,
+                        click_mode: LeftClickMode(new_selected, new_targeted),
+                      )
+                    }
+                    True -> {
+                      let assert Ok(piece) =
+                        map.get(model.pieces, to_int(selected_pos))
+                      let new_pieces =
+                        map.insert(model.pieces, index, piece)
+                        |> map.delete(to_int(selected_pos))
+                      let new_selected = None
+                      let new_targeted = []
+                      State(
+                        ..model,
+                        pieces: new_pieces,
+                        click_mode: LeftClickMode(new_selected, new_targeted),
+                      )
+                    }
+                  }
                 }
               }
             }
-            Error(_) -> []
+            None -> {
+              let #(new_selected, new_targeted) = case model.moveable.player {
+                None -> #(None, None)
+                Some(player) -> {
+                  let maybe_clicked_piece = map.get(model.pieces, index)
+                  case maybe_clicked_piece {
+                    Error(_) -> #(None, None)
+                    Ok(piece) ->
+                      case piece.player == player {
+                        False -> #(None, None)
+                        True -> {
+                          let new_targeted = case model.moveable.moves {
+                            None -> None
+                            Some(moves) -> {
+                              let maybe_moves =
+                                list.find(
+                                  moves.moves,
+                                  fn(move) {
+                                    move.0 == Origin(origin: from_int(index))
+                                  },
+                                )
+                              case maybe_moves {
+                                Error(_) -> None
+                                Ok(moves) -> Some(moves)
+                              }
+                            }
+                          }
+                          #(Some(from_int(index)), new_targeted)
+                        }
+                      }
+                  }
+                }
+              }
+              let new_targeted = case new_targeted {
+                None -> []
+                Some(moves) -> {
+                  let dests = moves.1
+                  dests.destinations
+                }
+              }
+              State(
+                ..model,
+                click_mode: LeftClickMode(new_selected, new_targeted),
+              )
+            }
           }
-          map.fold(
-            model.squares,
-            model,
-            fn(model, square_index, square) {
-              let selected = case
-                #(index == square_index, square.player_piece)
-              {
-                #(True, Some(player_piece)) if player_piece.player == model.moveable.player ->
-                  True
-                _ -> False
-              }
-              let targeted = list.contains(destinations, from_int(square_index))
+        }
 
-              let status = case #(selected, targeted) {
-                #(True, _) -> Some(square.Selected)
-                #(False, True) -> Some(square.Targeted)
-                #(False, False) -> None
-                #(True, True) -> panic("This should never happen")
+        RightClickMode(_) -> {
+          let #(new_selected, new_targeted) = case model.moveable.player {
+            None -> #(None, None)
+            Some(player) -> {
+              let maybe_clicked_piece = map.get(model.pieces, index)
+              case maybe_clicked_piece {
+                Error(_) -> #(None, None)
+                Ok(piece) ->
+                  case piece.player == player {
+                    False -> #(None, None)
+                    True -> {
+                      let new_targeted = case model.moveable.moves {
+                        None -> None
+                        Some(moves) -> {
+                          let maybe_moves =
+                            list.find(
+                              moves.moves,
+                              fn(move) {
+                                move.0 == Origin(origin: from_int(index))
+                              },
+                            )
+                          case maybe_moves {
+                            Error(_) -> None
+                            Ok(moves) -> Some(moves)
+                          }
+                        }
+                      }
+                      #(Some(from_int(index)), new_targeted)
+                    }
+                  }
               }
-              let new_squares =
-                map.insert(
-                  model.squares,
-                  square_index,
-                  square.Square(..square, status: status),
-                )
-              case selected {
-                True -> {
-                  state.State(
-                    ..model,
-                    squares: new_squares,
-                    selected_square: Some(square),
-                  )
-                }
-                False -> {
-                  state.State(..model, squares: new_squares)
-                }
-              }
-            },
-          )
+            }
+          }
+          let new_targeted = case new_targeted {
+            None -> []
+            Some(moves) -> {
+              let dests = moves.1
+              dests.destinations
+            }
+          }
+          State(..model, click_mode: LeftClickMode(new_selected, new_targeted))
         }
       }
     }
   }
+
   #(new_state, effect.none())
 }
 
@@ -345,28 +355,41 @@ fn draw_board(model: state.State) {
     [],
     fn(square_list, index) {
       let assert Ok(class_name) = list.at(color_order, index % 16)
-      let assert Ok(square) = map.get(model.squares, index)
 
       let square_color = case class_name {
         "whiteSquare" -> "#f0d9b5"
         "blackSquare" -> "#b58863"
       }
+      let square_mark_flag = case model.click_mode {
+        LeftClickMode(selected, targeted) -> {
+          let selected = case selected {
+            None -> False
+            Some(selected) -> selected == from_int(index)
+          }
+          let targeted = list.contains(targeted, from_int(index))
+          selected || targeted
+        }
+        RightClickMode(highlighted) -> {
+          list.contains(highlighted, from_int(index))
+        }
+      }
+      let maybe_clicked_piece = map.get(model.pieces, index)
       let square_div =
         div(
           [
             class(class_name),
-            case square.status {
-              Some(_) ->
+            case square_mark_flag {
+              True ->
                 attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
-              None -> attribute.style([#("border-color", square_color)])
+              False -> attribute.style([#("border-color", square_color)])
             },
             event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
             event.on("click", fn(_) { Ok(LeftClick(index)) }),
           ],
           {
-            case square.player_piece {
-              None -> []
-              Some(player_piece) -> {
+            case maybe_clicked_piece {
+              Error(_) -> []
+              Ok(player_piece) -> {
                 case #(player_piece.piece, player_piece.player) {
                   #(types.Pawn(_), types.White) -> [
                     html.img([

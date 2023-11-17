@@ -4,6 +4,7 @@ import position.{type Position}
 pub type Player {
   White
   Black
+  Both
 }
 
 pub type Piece {
