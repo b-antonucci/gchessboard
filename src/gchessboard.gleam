@@ -159,103 +159,43 @@ fn update(model: state.State, msg) {
       }
     }
     LeftClick(index) -> {
-      // TODO: add logic stopping move making after a move is made using turn field
-      case model.click_mode {
-        LeftClickMode(selected, targeted) -> {
-          case selected {
-            Some(selected_pos) -> {
-              case #(selected_pos == from_int(index), targeted) {
-                #(True, _) -> {
-                  let new_selected = None
-                  let new_targeted = []
-                  State(
-                    ..model,
-                    click_mode: LeftClickMode(new_selected, new_targeted),
-                  )
-                }
-                #(False, []) -> {
-                  let new_selected = Some(from_int(index))
-                  let new_targeted = case model.moveable.moves {
-                    None -> []
-                    Some(moves) -> {
-                      let maybe_moves =
-                        list.find(
-                          moves.moves,
-                          fn(move) { move.0 == Origin(origin: from_int(index)) },
-                        )
-                      case maybe_moves {
-                        Error(_) -> []
-                        Ok(moves) -> {
-                          let dests = moves.1
-                          dests.destinations
-                        }
-                      }
-                    }
-                  }
-                  State(
-                    ..model,
-                    click_mode: LeftClickMode(new_selected, new_targeted),
-                  )
-                }
-                #(False, dests) -> {
-                  case list.contains(dests, from_int(index)) {
-                    False -> {
-                      let new_selected = Some(from_int(index))
-                      let new_targeted = case model.moveable.moves {
-                        None -> []
-                        Some(moves) -> {
-                          let maybe_moves =
-                            list.find(
-                              moves.moves,
-                              fn(move) {
-                                move.0 == Origin(origin: from_int(index))
-                              },
-                            )
-                          case maybe_moves {
-                            Error(_) -> []
-                            Ok(moves) -> {
-                              let dests = moves.1
-                              dests.destinations
-                            }
-                          }
-                        }
-                      }
-                      State(
-                        ..model,
-                        click_mode: LeftClickMode(new_selected, new_targeted),
-                      )
-                    }
-                    True -> {
-                      let assert Ok(piece) =
-                        map.get(model.pieces, to_int(selected_pos))
-                      let new_pieces =
-                        map.insert(model.pieces, index, piece)
-                        |> map.delete(to_int(selected_pos))
-                      let new_selected = None
-                      let new_targeted = []
-                      State(
-                        ..model,
-                        pieces: new_pieces,
-                        click_mode: LeftClickMode(new_selected, new_targeted),
-                      )
-                    }
-                  }
-                }
-              }
+      case model.moveable.player {
+        None -> {
+          let new_selected = None
+          let new_targeted = []
+          State(..model, click_mode: LeftClickMode(new_selected, new_targeted))
+        }
+        Some(moveable_player) -> {
+          case moveable_player == model.turn {
+            False -> {
+              let new_selected = None
+              let new_targeted = []
+              State(
+                ..model,
+                click_mode: LeftClickMode(new_selected, new_targeted),
+              )
             }
-            None -> {
-              let #(new_selected, new_targeted) = case model.moveable.player {
-                None -> #(None, None)
-                Some(player) -> {
-                  let maybe_clicked_piece = map.get(model.pieces, index)
-                  case maybe_clicked_piece {
-                    Error(_) -> #(None, None)
-                    Ok(piece) ->
-                      case piece.player == player {
-                        False -> #(None, None)
-                        True -> {
+            True ->
+              case model.click_mode {
+                LeftClickMode(selected, targeted) -> {
+                  case selected {
+                    Some(selected_pos) -> {
+                      case #(selected_pos == from_int(index), targeted) {
+                        #(True, _) -> {
+                          let new_selected = None
+                          let new_targeted = []
+                          State(
+                            ..model,
+                            click_mode: LeftClickMode(
+                              new_selected,
+                              new_targeted,
+                            ),
+                          )
+                        }
+                        #(False, []) -> {
+                          let new_selected = Some(from_int(index))
                           let new_targeted = case model.moveable.moves {
-                            None -> None
+                            None -> []
                             Some(moves) -> {
                               let maybe_moves =
                                 list.find(
@@ -265,73 +205,181 @@ fn update(model: state.State, msg) {
                                   },
                                 )
                               case maybe_moves {
-                                Error(_) -> None
-                                Ok(moves) -> Some(moves)
+                                Error(_) -> []
+                                Ok(moves) -> {
+                                  let dests = moves.1
+                                  dests.destinations
+                                }
                               }
                             }
                           }
-                          #(Some(from_int(index)), new_targeted)
+                          State(
+                            ..model,
+                            click_mode: LeftClickMode(
+                              new_selected,
+                              new_targeted,
+                            ),
+                          )
                         }
-                      }
-                  }
-                }
-              }
-              let new_targeted = case new_targeted {
-                None -> []
-                Some(moves) -> {
-                  let dests = moves.1
-                  dests.destinations
-                }
-              }
-              State(
-                ..model,
-                click_mode: LeftClickMode(new_selected, new_targeted),
-              )
-            }
-          }
-        }
-
-        RightClickMode(_) -> {
-          let #(new_selected, new_targeted) = case model.moveable.player {
-            None -> #(None, None)
-            Some(player) -> {
-              let maybe_clicked_piece = map.get(model.pieces, index)
-              case maybe_clicked_piece {
-                Error(_) -> #(None, None)
-                Ok(piece) ->
-                  case piece.player == player {
-                    False -> #(None, None)
-                    True -> {
-                      let new_targeted = case model.moveable.moves {
-                        None -> None
-                        Some(moves) -> {
-                          let maybe_moves =
-                            list.find(
-                              moves.moves,
-                              fn(move) {
-                                move.0 == Origin(origin: from_int(index))
-                              },
-                            )
-                          case maybe_moves {
-                            Error(_) -> None
-                            Ok(moves) -> Some(moves)
+                        #(False, dests) -> {
+                          case list.contains(dests, from_int(index)) {
+                            False -> {
+                              let new_selected = Some(from_int(index))
+                              let new_targeted = case model.moveable.moves {
+                                None -> []
+                                Some(moves) -> {
+                                  let maybe_moves =
+                                    list.find(
+                                      moves.moves,
+                                      fn(move) {
+                                        move.0 == Origin(origin: from_int(index))
+                                      },
+                                    )
+                                  case maybe_moves {
+                                    Error(_) -> []
+                                    Ok(moves) -> {
+                                      let dests = moves.1
+                                      dests.destinations
+                                    }
+                                  }
+                                }
+                              }
+                              State(
+                                ..model,
+                                click_mode: LeftClickMode(
+                                  new_selected,
+                                  new_targeted,
+                                ),
+                              )
+                            }
+                            True -> {
+                              let assert Ok(piece) =
+                                map.get(model.pieces, to_int(selected_pos))
+                              let new_pieces =
+                                map.insert(model.pieces, index, piece)
+                                |> map.delete(to_int(selected_pos))
+                              let new_selected = None
+                              let new_targeted = []
+                              let new_turn = case model.turn {
+                                types.White -> types.Black
+                                types.Black -> types.White
+                                types.Both -> types.Both
+                              }
+                              State(
+                                ..model,
+                                turn: new_turn,
+                                pieces: new_pieces,
+                                click_mode: LeftClickMode(
+                                  new_selected,
+                                  new_targeted,
+                                ),
+                              )
+                            }
                           }
                         }
                       }
-                      #(Some(from_int(index)), new_targeted)
+                    }
+                    None -> {
+                      let #(new_selected, new_targeted) = case
+                        model.moveable.player
+                      {
+                        None -> #(None, None)
+                        Some(player) -> {
+                          let maybe_clicked_piece = map.get(model.pieces, index)
+                          case maybe_clicked_piece {
+                            Error(_) -> #(None, None)
+                            Ok(piece) ->
+                              case piece.player == player {
+                                False -> #(None, None)
+                                True -> {
+                                  let new_targeted = case model.moveable.moves {
+                                    None -> None
+                                    Some(moves) -> {
+                                      let maybe_moves =
+                                        list.find(
+                                          moves.moves,
+                                          fn(move) {
+                                            move.0 == Origin(origin: from_int(
+                                              index,
+                                            ))
+                                          },
+                                        )
+                                      case maybe_moves {
+                                        Error(_) -> None
+                                        Ok(moves) -> Some(moves)
+                                      }
+                                    }
+                                  }
+                                  #(Some(from_int(index)), new_targeted)
+                                }
+                              }
+                          }
+                        }
+                      }
+                      let new_targeted = case new_targeted {
+                        None -> []
+                        Some(moves) -> {
+                          let dests = moves.1
+                          dests.destinations
+                        }
+                      }
+                      State(
+                        ..model,
+                        click_mode: LeftClickMode(new_selected, new_targeted),
+                      )
                     }
                   }
+                }
+
+                RightClickMode(_) -> {
+                  let #(new_selected, new_targeted) = case
+                    model.moveable.player
+                  {
+                    None -> #(None, None)
+                    Some(player) -> {
+                      let maybe_clicked_piece = map.get(model.pieces, index)
+                      case maybe_clicked_piece {
+                        Error(_) -> #(None, None)
+                        Ok(piece) ->
+                          case piece.player == player {
+                            False -> #(None, None)
+                            True -> {
+                              let new_targeted = case model.moveable.moves {
+                                None -> None
+                                Some(moves) -> {
+                                  let maybe_moves =
+                                    list.find(
+                                      moves.moves,
+                                      fn(move) {
+                                        move.0 == Origin(origin: from_int(index))
+                                      },
+                                    )
+                                  case maybe_moves {
+                                    Error(_) -> None
+                                    Ok(moves) -> Some(moves)
+                                  }
+                                }
+                              }
+                              #(Some(from_int(index)), new_targeted)
+                            }
+                          }
+                      }
+                    }
+                  }
+                  let new_targeted = case new_targeted {
+                    None -> []
+                    Some(moves) -> {
+                      let dests = moves.1
+                      dests.destinations
+                    }
+                  }
+                  State(
+                    ..model,
+                    click_mode: LeftClickMode(new_selected, new_targeted),
+                  )
+                }
               }
-            }
           }
-          let new_targeted = case new_targeted {
-            None -> []
-            Some(moves) -> {
-              let dests = moves.1
-              dests.destinations
-            }
-          }
-          State(..model, click_mode: LeftClickMode(new_selected, new_targeted))
         }
       }
     }
