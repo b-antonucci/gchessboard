@@ -1,5 +1,5 @@
-export function alert() {
-    alert("Hello from JS")
+export function alert_js(message) {
+    alert(message)
 }
 
   

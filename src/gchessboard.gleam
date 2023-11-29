@@ -1,29 +1,35 @@
 import lustre
 import lustre/event
-import lustre/effect
+import lustre/effect.{type Effect}
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
 import state.{type State, LeftClickMode, RightClickMode, State}
 import position.{Position, from_int, to_int}
 import rank.{Four, One, Three, Two}
 import file.{A, B, C, D, E, F, G, H}
-import types.{Origin}
-import config.{type Config, Config}
+import types.{type MoveData, Origin, White}
+import config.{type Config, Config, Moveable}
 import gleam/list.{range}
 import gleam/map
 import gleam/option.{None, Some}
 
-@external(javascript, "./ffi.js", "alert")
-pub fn alert() -> Nil
+@external(javascript, "./ffi.js", "alert_js")
+pub fn alert_js(message: Int) -> Nil
 
 pub fn main() {
   let app = lustre.application(init, update, view)
   let assert Ok(interface) = lustre.start(app, "[data-lustre-app]", Nil)
 
   let config =
-    Config(moveable: Some(config.Moveable(
-      player: None,
-      after: None,
+    Config(moveable: Some(Moveable(
+      // TODO: continue from here after break
+      player: Some(White),
+      after: Some(fn(move_data) {
+        let move_data: MoveData = move_data
+        let from = move_data.from
+        alert_js(to_int(from))
+        Nil
+      }),
       moves: Some(types.Moves(moves: [
         #(
           types.Origin(origin: Position(file: B, rank: One)),
@@ -118,7 +124,7 @@ fn update(model: state.State, msg) {
     Set(config) -> {
       let new_model = case config.moveable {
         None -> {
-          model
+          #(model, effect.none())
         }
         Some(config_moveable) -> {
           let new_player = case config_moveable.player {
@@ -135,13 +141,16 @@ fn update(model: state.State, msg) {
             Some(moves) -> Some(moves)
             None -> model.moveable.moves
           }
-          state.State(
-            ..model,
-            moveable: state.Moveable(
-              player: new_player,
-              moves: new_moves,
-              after: new_after,
+          #(
+            state.State(
+              ..model,
+              moveable: state.Moveable(
+                player: new_player,
+                moves: new_moves,
+                after: new_after,
+              ),
             ),
+            effect.none(),
           )
         }
       }
@@ -152,10 +161,15 @@ fn update(model: state.State, msg) {
         RightClickMode(highlighted) -> {
           let new_highlight = from_int(index)
           let highlighted = [new_highlight, ..highlighted]
-          State(..model, click_mode: RightClickMode(highlighted))
+          #(
+            State(..model, click_mode: RightClickMode(highlighted)),
+            effect.none(),
+          )
         }
-        LeftClickMode(_, _) ->
-          State(..model, click_mode: RightClickMode([from_int(index)]))
+        LeftClickMode(_, _) -> #(
+          State(..model, click_mode: RightClickMode([from_int(index)])),
+          effect.none(),
+        )
       }
     }
     LeftClick(index) -> {
@@ -163,16 +177,25 @@ fn update(model: state.State, msg) {
         None -> {
           let new_selected = None
           let new_targeted = []
-          State(..model, click_mode: LeftClickMode(new_selected, new_targeted))
+          #(
+            State(
+              ..model,
+              click_mode: LeftClickMode(new_selected, new_targeted),
+            ),
+            effect.none(),
+          )
         }
         Some(moveable_player) -> {
           case moveable_player == model.turn {
             False -> {
               let new_selected = None
               let new_targeted = []
-              State(
-                ..model,
-                click_mode: LeftClickMode(new_selected, new_targeted),
+              #(
+                State(
+                  ..model,
+                  click_mode: LeftClickMode(new_selected, new_targeted),
+                ),
+                effect.none(),
               )
             }
             True ->
@@ -184,12 +207,15 @@ fn update(model: state.State, msg) {
                         #(True, _) -> {
                           let new_selected = None
                           let new_targeted = []
-                          State(
-                            ..model,
-                            click_mode: LeftClickMode(
-                              new_selected,
-                              new_targeted,
+                          #(
+                            State(
+                              ..model,
+                              click_mode: LeftClickMode(
+                                new_selected,
+                                new_targeted,
+                              ),
                             ),
+                            effect.none(),
                           )
                         }
                         #(False, []) -> {
@@ -213,12 +239,15 @@ fn update(model: state.State, msg) {
                               }
                             }
                           }
-                          State(
-                            ..model,
-                            click_mode: LeftClickMode(
-                              new_selected,
-                              new_targeted,
+                          #(
+                            State(
+                              ..model,
+                              click_mode: LeftClickMode(
+                                new_selected,
+                                new_targeted,
+                              ),
                             ),
+                            effect.none(),
                           )
                         }
                         #(False, dests) -> {
@@ -244,12 +273,15 @@ fn update(model: state.State, msg) {
                                   }
                                 }
                               }
-                              State(
-                                ..model,
-                                click_mode: LeftClickMode(
-                                  new_selected,
-                                  new_targeted,
+                              #(
+                                State(
+                                  ..model,
+                                  click_mode: LeftClickMode(
+                                    new_selected,
+                                    new_targeted,
+                                  ),
                                 ),
+                                effect.none(),
                               )
                             }
                             True -> {
@@ -265,14 +297,33 @@ fn update(model: state.State, msg) {
                                 types.Black -> types.White
                                 types.Both -> types.Both
                               }
-                              State(
-                                ..model,
-                                turn: new_turn,
-                                pieces: new_pieces,
-                                click_mode: LeftClickMode(
-                                  new_selected,
-                                  new_targeted,
+                              #(
+                                State(
+                                  ..model,
+                                  turn: new_turn,
+                                  pieces: new_pieces,
+                                  click_mode: LeftClickMode(
+                                    new_selected,
+                                    new_targeted,
+                                  ),
                                 ),
+                                effect.from(fn(_) {
+                                  case model.moveable.after {
+                                    None -> Nil
+                                    Some(after) ->
+                                      after(types.MoveData(
+                                        player: model.turn,
+                                        player_piece: None,
+                                        move_type: None,
+                                        from: selected_pos,
+                                        to: from_int(index),
+                                        captured_piece: None,
+                                        en_passant: None,
+                                        promotion: None,
+                                        castling: None,
+                                      ))
+                                  }
+                                }),
                               )
                             }
                           }
@@ -323,9 +374,12 @@ fn update(model: state.State, msg) {
                           dests.destinations
                         }
                       }
-                      State(
-                        ..model,
-                        click_mode: LeftClickMode(new_selected, new_targeted),
+                      #(
+                        State(
+                          ..model,
+                          click_mode: LeftClickMode(new_selected, new_targeted),
+                        ),
+                        effect.none(),
                       )
                     }
                   }
@@ -373,9 +427,12 @@ fn update(model: state.State, msg) {
                       dests.destinations
                     }
                   }
-                  State(
-                    ..model,
-                    click_mode: LeftClickMode(new_selected, new_targeted),
+                  #(
+                    State(
+                      ..model,
+                      click_mode: LeftClickMode(new_selected, new_targeted),
+                    ),
+                    effect.none(),
                   )
                 }
               }
@@ -385,7 +442,7 @@ fn update(model: state.State, msg) {
     }
   }
 
-  #(new_state, effect.none())
+  new_state
 }
 
 const color_order = [

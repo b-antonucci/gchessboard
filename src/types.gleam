@@ -28,8 +28,8 @@ pub type Castling {
 pub type MoveData {
   MoveData(
     player: Player,
-    player_piece: PlayerPiece,
-    move_type: MoveType,
+    player_piece: Option(PlayerPiece),
+    move_type: Option(MoveType),
     from: Position,
     to: Position,
     captured_piece: Option(PlayerPiece),
