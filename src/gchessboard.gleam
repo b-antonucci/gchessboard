@@ -1,6 +1,6 @@
 import lustre
 import lustre/event
-import lustre/effect.{type Effect}
+import lustre/effect
 import lustre/element/html.{div}
 import lustre/attribute.{class, id, property}
 import state.{type State, LeftClickMode, RightClickMode, State}
