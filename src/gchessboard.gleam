@@ -20,15 +20,17 @@ pub fn main() {
   let app = lustre.application(init, update, view)
   let assert Ok(interface) = lustre.start(app, "[data-lustre-app]", Nil)
 
+  let after = fn(move_data) {
+    let move_data: MoveData = move_data
+    let from = move_data.from
+    alert_js(to_int(from))
+    Nil
+  }
+
   let config =
     Config(moveable: Some(Moveable(
       player: Some(White),
-      after: Some(fn(move_data) {
-        let move_data: MoveData = move_data
-        let from = move_data.from
-        alert_js(to_int(from))
-        Nil
-      }),
+      after: Some(after),
       moves: Some(types.Moves(moves: [
         #(
           types.Origin(origin: Position(file: B, rank: One)),
