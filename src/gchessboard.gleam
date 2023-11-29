@@ -22,7 +22,6 @@ pub fn main() {
 
   let config =
     Config(moveable: Some(Moveable(
-      // TODO: continue from here after break
       player: Some(White),
       after: Some(fn(move_data) {
         let move_data: MoveData = move_data
@@ -583,6 +582,7 @@ fn view(model: state.State) {
   div(
     [id("chessboard"), property("oncontextmenu", "return false;")],
     [
+      // TODO: replace with css file that we can import
       style(
         [],
         "
