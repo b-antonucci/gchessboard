@@ -1,7 +1,7 @@
 import lustre
 import lustre/event
 import lustre/effect
-import lustre/element/html.{div}
+import lustre/element/html.{div, style}
 import lustre/attribute.{class, id, property}
 import state.{type State, LeftClickMode, RightClickMode, State}
 import position.{Position, from_int, to_int}
@@ -582,6 +582,68 @@ fn draw_board(model: state.State) {
 fn view(model: state.State) {
   div(
     [id("chessboard"), property("oncontextmenu", "return false;")],
-    draw_board(model),
+    [
+      style(
+        [],
+        "
+        #chessboard {
+            width: 480px;
+            height: 480px;
+            float: left;
+            line-height: 0;
+            -webkit-user-drag: none;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        #chessboard>* {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: sans-serif;
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: auto;
+            margin-bottom: auto;
+            
+        }
+
+        .whiteSquare {
+            display: inline-block;
+            width: 60px;
+            /* TODO: replace px with percentage */
+            height: 60px;
+            box-sizing: border-box;
+            background-color: #f0d9b5;
+            border-style: solid;
+            border-width: 5px;
+            border-color: #f0d9b5;
+        }
+
+        .blackSquare {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: #b58863;
+            box-sizing: border-box;
+            border-style: solid;
+            border-width: 5px;
+            border-color: #b58863;
+        }
+    ",
+      ),
+      ..draw_board(model)
+    ],
   )
 }
