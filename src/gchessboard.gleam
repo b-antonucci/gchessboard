@@ -1,126 +1,26 @@
-import lustre
 import lustre/event
 import lustre/effect
 import lustre/element/html.{div, style}
 import lustre/attribute.{class, id, property}
 import state.{type State, LeftClickMode, RightClickMode, State}
-import position.{Position, from_int, to_int}
-import rank.{Four, One, Three, Two}
-import file.{A, B, C, D, E, F, G, H}
-import types.{type MoveData, Origin, White}
-import config.{type Config, Config, Moveable}
+import position.{from_int, to_int}
+import types.{Origin, White}
+import config.{type Config, Config}
 import gleam/list.{range}
 import gleam/map
 import gleam/option.{None, Some}
 
-@external(javascript, "./ffi.js", "alert_js")
-pub fn alert_js(message: Int) -> Nil
-
-pub fn main() {
-  let app = lustre.application(init, update, view)
-  let assert Ok(interface) = lustre.start(app, "[data-lustre-app]", Nil)
-
-  let after = fn(move_data) {
-    let move_data: MoveData = move_data
-    let from = move_data.from
-    alert_js(to_int(from))
-    Nil
-  }
-
-  let config =
-    Config(moveable: Some(Moveable(
-      player: Some(White),
-      after: Some(after),
-      moves: Some(types.Moves(moves: [
-        #(
-          types.Origin(origin: Position(file: B, rank: One)),
-          types.Destinations(destinations: [
-            Position(file: A, rank: Three),
-            Position(file: C, rank: Three),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: G, rank: One)),
-          types.Destinations(destinations: [
-            Position(file: F, rank: Three),
-            Position(file: H, rank: Three),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: A, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: A, rank: Three),
-            Position(file: A, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: B, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: B, rank: Three),
-            Position(file: B, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: C, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: C, rank: Three),
-            Position(file: C, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: D, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: D, rank: Three),
-            Position(file: D, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: E, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: E, rank: Three),
-            Position(file: E, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: F, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: F, rank: Three),
-            Position(file: F, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: G, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: G, rank: Three),
-            Position(file: G, rank: Four),
-          ]),
-        ),
-        #(
-          types.Origin(origin: Position(file: H, rank: Two)),
-          types.Destinations(destinations: [
-            Position(file: H, rank: Three),
-            Position(file: H, rank: Four),
-          ]),
-        ),
-      ])),
-    )))
-
-  interface(Set(config))
-
-  Nil
-}
-
-fn init(_) {
+pub fn init(_) {
   #(state.starting_position_board(), effect.none())
 }
 
-type Msg {
+pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
   Set(config: Config)
 }
 
-fn update(model: state.State, msg) {
+pub fn update(model: state.State, msg) {
   let new_state = case msg {
     Set(config) -> {
       let new_model = case config.moveable {
@@ -580,7 +480,7 @@ fn draw_board(model: state.State) {
   )
 }
 
-fn view(model: state.State) {
+pub fn view(model: state.State) {
   div(
     [id("chessboard"), property("oncontextmenu", "return false;")],
     [
