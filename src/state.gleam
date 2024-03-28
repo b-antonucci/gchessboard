@@ -1,6 +1,6 @@
 import types.{type Moves, type Player, Moves}
 import position.{type Position, Position}
-import gleam/map.{type Map}
+import gleam/dict.{type Dict}
 import gleam/option.{type Option, None, Some}
 
 pub type Moveable {
@@ -19,7 +19,7 @@ pub type ClickMode {
 pub type State {
   State(
     turn: Player,
-    pieces: Map(Int, types.PlayerPiece),
+    pieces: Dict(Int, types.PlayerPiece),
     click_mode: ClickMode,
     moveable: Moveable,
   )
@@ -224,7 +224,7 @@ pub fn starting_position_board() -> State {
 
   State(
     types.White,
-    map.from_list(list_of_pieces_rewrite),
+    dict.from_list(list_of_pieces_rewrite),
     LeftClickMode(selected: None, targeted: []),
     moveable,
   )

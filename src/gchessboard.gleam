@@ -7,7 +7,7 @@ import position.{from_int, to_int}
 import types.{Origin, White}
 import config.{type Config, Config}
 import gleam/list.{range}
-import gleam/map
+import gleam/dict
 import gleam/option.{None, Some}
 
 pub fn init(_) {
@@ -125,12 +125,9 @@ pub fn update(model: state.State, msg) {
                             None -> []
                             Some(moves) -> {
                               let maybe_moves =
-                                list.find(
-                                  moves.moves,
-                                  fn(move) {
-                                    move.0 == Origin(origin: from_int(index))
-                                  },
-                                )
+                                list.find(moves.moves, fn(move) {
+                                  move.0 == Origin(origin: from_int(index))
+                                })
                               case maybe_moves {
                                 Error(_) -> []
                                 Ok(moves) -> {
@@ -159,12 +156,9 @@ pub fn update(model: state.State, msg) {
                                 None -> []
                                 Some(moves) -> {
                                   let maybe_moves =
-                                    list.find(
-                                      moves.moves,
-                                      fn(move) {
-                                        move.0 == Origin(origin: from_int(index))
-                                      },
-                                    )
+                                    list.find(moves.moves, fn(move) {
+                                      move.0 == Origin(origin: from_int(index))
+                                    })
                                   case maybe_moves {
                                     Error(_) -> []
                                     Ok(moves) -> {
@@ -187,10 +181,10 @@ pub fn update(model: state.State, msg) {
                             }
                             True -> {
                               let assert Ok(piece) =
-                                map.get(model.pieces, to_int(selected_pos))
+                                dict.get(model.pieces, to_int(selected_pos))
                               let new_pieces =
-                                map.insert(model.pieces, index, piece)
-                                |> map.delete(to_int(selected_pos))
+                                dict.insert(model.pieces, index, piece)
+                                |> dict.delete(to_int(selected_pos))
                               let new_selected = None
                               let new_targeted = []
                               let new_turn = case model.turn {
@@ -237,7 +231,8 @@ pub fn update(model: state.State, msg) {
                       {
                         None -> #(None, None)
                         Some(player) -> {
-                          let maybe_clicked_piece = map.get(model.pieces, index)
+                          let maybe_clicked_piece =
+                            dict.get(model.pieces, index)
                           case maybe_clicked_piece {
                             Error(_) -> #(None, None)
                             Ok(piece) ->
@@ -248,14 +243,10 @@ pub fn update(model: state.State, msg) {
                                     None -> None
                                     Some(moves) -> {
                                       let maybe_moves =
-                                        list.find(
-                                          moves.moves,
-                                          fn(move) {
-                                            move.0 == Origin(origin: from_int(
-                                              index,
-                                            ))
-                                          },
-                                        )
+                                        list.find(moves.moves, fn(move) {
+                                          move.0
+                                          == Origin(origin: from_int(index))
+                                        })
                                       case maybe_moves {
                                         Error(_) -> None
                                         Ok(moves) -> Some(moves)
@@ -292,7 +283,7 @@ pub fn update(model: state.State, msg) {
                   {
                     None -> #(None, None)
                     Some(player) -> {
-                      let maybe_clicked_piece = map.get(model.pieces, index)
+                      let maybe_clicked_piece = dict.get(model.pieces, index)
                       case maybe_clicked_piece {
                         Error(_) -> #(None, None)
                         Ok(piece) ->
@@ -303,12 +294,9 @@ pub fn update(model: state.State, msg) {
                                 None -> None
                                 Some(moves) -> {
                                   let maybe_moves =
-                                    list.find(
-                                      moves.moves,
-                                      fn(move) {
-                                        move.0 == Origin(origin: from_int(index))
-                                      },
-                                    )
+                                    list.find(moves.moves, fn(move) {
+                                      move.0 == Origin(origin: from_int(index))
+                                    })
                                   case maybe_moves {
                                     Error(_) -> None
                                     Ok(moves) -> Some(moves)
@@ -356,138 +344,132 @@ const color_order = [
 fn draw_board(model: state.State) {
   let list_of_int_index: List(Int) = range(0, 63)
 
-  list.fold(
-    list_of_int_index,
-    [],
-    fn(square_list, index) {
-      let assert Ok(class_name) = list.at(color_order, index % 16)
+  list.fold(list_of_int_index, [], fn(square_list, index) {
+    let assert Ok(class_name) = list.at(color_order, index % 16)
 
-      let square_color = case class_name {
-        "whiteSquare" -> "#f0d9b5"
-        "blackSquare" -> "#b58863"
-      }
-      let square_mark_flag = case model.click_mode {
-        LeftClickMode(selected, targeted) -> {
-          let selected = case selected {
-            None -> False
-            Some(selected) -> selected == from_int(index)
-          }
-          let targeted = list.contains(targeted, from_int(index))
-          selected || targeted
+    let square_color = case class_name {
+      "whiteSquare" -> "#f0d9b5"
+      "blackSquare" -> "#b58863"
+    }
+    let square_mark_flag = case model.click_mode {
+      LeftClickMode(selected, targeted) -> {
+        let selected = case selected {
+          None -> False
+          Some(selected) -> selected == from_int(index)
         }
-        RightClickMode(highlighted) -> {
-          list.contains(highlighted, from_int(index))
-        }
+        let targeted = list.contains(targeted, from_int(index))
+        selected || targeted
       }
-      let maybe_clicked_piece = map.get(model.pieces, index)
-      let square_div =
-        div(
-          [
-            class(class_name),
-            case square_mark_flag {
-              True ->
-                attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
-              False -> attribute.style([#("border-color", square_color)])
-            },
-            event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
-            event.on("click", fn(_) { Ok(LeftClick(index)) }),
-          ],
-          {
-            case maybe_clicked_piece {
-              Error(_) -> []
-              Ok(player_piece) -> {
-                case #(player_piece.piece, player_piece.player) {
-                  #(types.Pawn(_), types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_plt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Pawn(_), types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_pdt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Knight, types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_nlt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Knight, types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_ndt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Bishop, types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_blt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Bishop, types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_bdt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Rook, types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_rlt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Rook, types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_rdt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Queen, types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_qlt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.Queen, types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_qdt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.King, types.White) -> [
-                    html.img([
-                      attribute.src("assets/Chess_klt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                  #(types.King, types.Black) -> [
-                    html.img([
-                      attribute.src("assets/Chess_kdt45.svg"),
-                      property("draggable", "false"),
-                    ]),
-                  ]
-                }
+      RightClickMode(highlighted) -> {
+        list.contains(highlighted, from_int(index))
+      }
+    }
+    let maybe_clicked_piece = dict.get(model.pieces, index)
+    let square_div =
+      div(
+        [
+          class(class_name),
+          case square_mark_flag {
+            True ->
+              attribute.style([#("border-color", "rgba(0, 128, 0, 0.655)")])
+            False -> attribute.style([#("border-color", square_color)])
+          },
+          event.on("contextmenu", fn(_) { Ok(RightClick(index)) }),
+          event.on("click", fn(_) { Ok(LeftClick(index)) }),
+        ],
+        {
+          case maybe_clicked_piece {
+            Error(_) -> []
+            Ok(player_piece) -> {
+              case #(player_piece.piece, player_piece.player) {
+                #(types.Pawn(_), types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_plt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Pawn(_), types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_pdt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Knight, types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_nlt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Knight, types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_ndt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Bishop, types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_blt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Bishop, types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_bdt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Rook, types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_rlt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Rook, types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_rdt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Queen, types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_qlt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.Queen, types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_qdt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.King, types.White) -> [
+                  html.img([
+                    attribute.src("assets/Chess_klt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
+                #(types.King, types.Black) -> [
+                  html.img([
+                    attribute.src("assets/Chess_kdt45.svg"),
+                    property("draggable", "false"),
+                  ]),
+                ]
               }
             }
-          },
-        )
+          }
+        },
+      )
 
-      [square_div, ..square_list]
-    },
-  )
+    [square_div, ..square_list]
+  })
 }
 
 pub fn view(model: state.State) {
-  div(
-    [id("chessboard"), property("oncontextmenu", "return false;")],
-    [
-      // TODO: replace with css file that we can import
-      style(
-        [],
-        "
+  div([id("chessboard"), property("oncontextmenu", "return false;")], [
+    // TODO: replace with css file that we can import
+    style(
+      [],
+      "
         #chessboard {
             width: 480px;
             height: 480px;
@@ -544,8 +526,7 @@ pub fn view(model: state.State) {
             border-color: #b58863;
         }
     ",
-      ),
-      ..draw_board(model)
-    ],
-  )
+    ),
+    ..draw_board(model)
+  ])
 }
