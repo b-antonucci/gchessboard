@@ -27,59 +27,102 @@ pub type State {
   )
 }
 
-pub fn update_board_with_fen(fen: String) -> State {
-  let piece_positions = case string.split(fen, " ") {
-    [positions, _, _, _, _, _] -> positions
-    _ -> panic("Invalid FEN string")
-  }
+// TODO: i need to write a seperate module for handling fen client side
+// logic like this would go in that module
+pub fn expand_fen_placement_row(row: String) -> String {
+  let expanded_row =
+    list.fold(string.split(row, ""), "", fn(acc, placement_data) {
+      case placement_data {
+        "1" -> string.append(acc, "1")
+        "2" -> {
+          string.append(acc, "11")
+        }
+        "3" -> {
+          string.append(acc, "111")
+        }
+        "4" -> {
+          string.append(acc, "1111")
+        }
+        "5" -> {
+          string.append(acc, "11111")
+        }
+        "6" -> {
+          string.append(acc, "111111")
+        }
+        "7" -> {
+          string.append(acc, "1111111")
+        }
+        "8" -> {
+          string.append(acc, "11111111")
+        }
+        "p" | "r" | "n" | "b" | "q" | "k" | "P" | "R" | "N" | "B" | "Q" | "K" -> {
+          string.append(acc, placement_data)
+        }
+
+        _ -> panic("Invalid placement data")
+      }
+    })
+
+  expanded_row
+}
+
+// TODO: i need to write a seperate module for handling fen client side
+// logic like this would go in that module
+pub fn update_board_with_fen(state: State, fen: String) -> State {
+  let assert Ok(piece_positions) = list.first(string.split(fen, " "))
   // convert a fen position to a list of tuples
   let list_of_pieces =
     piece_positions
     |> string.split("/")
     |> list.index_map(fn(row, y) {
       row
+      |> expand_fen_placement_row
       |> string.split("")
-      |> list.index_map(fn(piece, x) {
-        let position = { 55 - { y * 8 } } + x
-        let player = case piece {
-          "r" -> types.Black
-          "n" -> types.Black
-          "b" -> types.Black
-          "q" -> types.Black
-          "k" -> types.Black
-          "p" -> types.Black
-          "R" -> types.White
-          "N" -> types.White
-          "B" -> types.White
-          "Q" -> types.White
-          "K" -> types.White
-          "P" -> types.White
-          _ -> panic("Invalid piece")
+      |> list.index_fold([], fn(acc, piece, x) {
+        case piece {
+          "1" -> acc
+          _ -> {
+            let position = { 56 - { y * 8 } } + x
+            let player = case piece {
+              "r" -> types.Black
+              "n" -> types.Black
+              "b" -> types.Black
+              "q" -> types.Black
+              "k" -> types.Black
+              "p" -> types.Black
+              "R" -> types.White
+              "N" -> types.White
+              "B" -> types.White
+              "Q" -> types.White
+              "K" -> types.White
+              "P" -> types.White
+              _ -> panic("Invalid piece")
+            }
+            let piece_type = case piece {
+              "r" | "R" -> types.Rook
+              "n" | "N" -> types.Knight
+              "b" | "B" -> types.Bishop
+              "q" | "Q" -> types.Queen
+              "k" | "K" -> types.King
+              "p" | "P" -> types.Pawn(None)
+              _ -> panic("Invalid piece")
+            }
+            list.prepend(acc, #(
+              position,
+              types.PlayerPiece(moved: False, piece: piece_type, player: player),
+            ))
+          }
         }
-        let piece_type = case piece {
-          "r" | "R" -> types.Rook
-          "n" | "N" -> types.Knight
-          "b" | "B" -> types.Bishop
-          "q" | "Q" -> types.Queen
-          "k" | "K" -> types.King
-          "p" | "P" -> types.Pawn(None)
-          _ -> panic("Invalid piece")
-        }
-        #(
-          position,
-          types.PlayerPiece(moved: False, piece: piece_type, player: player),
-        )
       })
     })
 
   let list_of_pieces = list.flatten(list_of_pieces)
-  let moveable = Moveable(player: Some(types.White), moves: None, after: None)
 
   State(
-    types.White,
+    state.turn,
     dict.from_list(list_of_pieces),
-    LeftClickMode(selected: None, targeted: []),
-    moveable,
+    state.click_mode,
+    state.moveable,
   )
 }
 

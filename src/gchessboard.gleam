@@ -6,7 +6,7 @@ import state.{type State, LeftClickMode, RightClickMode, State}
 import position.{from_int, to_int}
 import types.{Origin, White}
 import config.{type Config, Config}
-import gleam/list.{range}
+import gleam/list
 import gleam/dict
 import gleam/option.{None, Some}
 
@@ -20,11 +20,16 @@ pub fn alert_js(message: Int) -> Nil
 pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
+  UpdateWithFen(fen: String)
   Set(config: Config)
 }
 
 pub fn update(model: state.State, msg) {
   let new_state = case msg {
+    UpdateWithFen(fen) -> {
+      let new_model = state.update_board_with_fen(model, fen)
+      #(new_model, effect.none())
+    }
     Set(config) -> {
       let new_model = case config.moveable {
         None -> {
@@ -358,6 +363,7 @@ fn draw_board(model: state.State) {
     let square_color = case class_name {
       "whiteSquare" -> "#f0d9b5"
       "blackSquare" -> "#b58863"
+      _ -> panic("Invalid class name")
     }
     let square_mark_flag = case model.click_mode {
       LeftClickMode(selected, targeted) -> {
@@ -462,6 +468,7 @@ fn draw_board(model: state.State) {
                     property("draggable", "false"),
                   ]),
                 ]
+                _ -> []
               }
             }
           }
