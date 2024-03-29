@@ -14,6 +14,9 @@ pub fn init(_) {
   #(state.starting_position_board(), effect.none())
 }
 
+@external(javascript, "./ffi.js", "alert_js")
+pub fn alert_js(message: Int) -> Nil
+
 pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
@@ -338,11 +341,16 @@ const color_order = [
   "whiteSquare", "blackSquare", "whiteSquare", "blackSquare", "whiteSquare",
   "blackSquare", "whiteSquare", "blackSquare", "blackSquare", "whiteSquare",
   "blackSquare", "whiteSquare", "blackSquare", "whiteSquare", "blackSquare",
-  "whiteSquare", "blackSquare", "whiteSquare", "blackSquare", "whiteSquare",
+  "whiteSquare",
 ]
 
 fn draw_board(model: state.State) {
-  let list_of_int_index: List(Int) = range(0, 63)
+  let list_of_int_index: List(Int) = [
+    7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18,
+    17, 16, 31, 30, 29, 28, 27, 26, 25, 24, 39, 38, 37, 36, 35, 34, 33, 32, 47,
+    46, 45, 44, 43, 42, 41, 40, 55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60,
+    59, 58, 57, 56,
+  ]
 
   list.fold(list_of_int_index, [], fn(square_list, index) {
     let assert Ok(class_name) = list.at(color_order, index % 16)
