@@ -8,6 +8,7 @@ pub type Config {
 pub type Moveable {
   Moveable(
     player: Option(Player),
+    fen: Option(String),
     moves: Option(Moves),
     after: Option(fn(types.MoveData) -> Nil),
   )

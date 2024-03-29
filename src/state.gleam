@@ -1,5 +1,7 @@
 import types.{type Moves, type Player, Moves}
 import position.{type Position, Position}
+import gleam/string
+import gleam/list
 import gleam/dict.{type Dict}
 import gleam/option.{type Option, None, Some}
 
@@ -22,6 +24,62 @@ pub type State {
     pieces: Dict(Int, types.PlayerPiece),
     click_mode: ClickMode,
     moveable: Moveable,
+  )
+}
+
+pub fn update_board_with_fen(fen: String) -> State {
+  let piece_positions = case string.split(fen, " ") {
+    [positions, _, _, _, _, _] -> positions
+    _ -> panic("Invalid FEN string")
+  }
+  // convert a fen position to a list of tuples
+  let list_of_pieces =
+    piece_positions
+    |> string.split("/")
+    |> list.index_map(fn(row, y) {
+      row
+      |> string.split("")
+      |> list.index_map(fn(piece, x) {
+        let position = { 55 - { y * 8 } } + x
+        let player = case piece {
+          "r" -> types.Black
+          "n" -> types.Black
+          "b" -> types.Black
+          "q" -> types.Black
+          "k" -> types.Black
+          "p" -> types.Black
+          "R" -> types.White
+          "N" -> types.White
+          "B" -> types.White
+          "Q" -> types.White
+          "K" -> types.White
+          "P" -> types.White
+          _ -> panic("Invalid piece")
+        }
+        let piece_type = case piece {
+          "r" | "R" -> types.Rook
+          "n" | "N" -> types.Knight
+          "b" | "B" -> types.Bishop
+          "q" | "Q" -> types.Queen
+          "k" | "K" -> types.King
+          "p" | "P" -> types.Pawn(None)
+          _ -> panic("Invalid piece")
+        }
+        #(
+          position,
+          types.PlayerPiece(moved: False, piece: piece_type, player: player),
+        )
+      })
+    })
+
+  let list_of_pieces = list.flatten(list_of_pieces)
+  let moveable = Moveable(player: Some(types.White), moves: None, after: None)
+
+  State(
+    types.White,
+    dict.from_list(list_of_pieces),
+    LeftClickMode(selected: None, targeted: []),
+    moveable,
   )
 }
 
