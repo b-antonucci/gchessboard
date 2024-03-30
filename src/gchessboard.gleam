@@ -8,7 +8,7 @@ import types.{Origin, White}
 import config.{type Config, Config}
 import gleam/list
 import gleam/dict
-import gleam/option.{None, Some}
+import gleam/option.{type Option, None, Some}
 
 pub fn init(_) {
   #(state.starting_position_board(), effect.none())
@@ -20,13 +20,50 @@ pub fn alert_js(message: Int) -> Nil
 pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
-  UpdateWithFen(fen: String)
+  NextTurn
+  SetFen(fen: String)
+  SetMoves(moves: Option(types.Moves))
+  SetMoveablePlayer(player: Option(types.Player))
   Set(config: Config)
 }
 
 pub fn update(model: state.State, msg) {
   let new_state = case msg {
-    UpdateWithFen(fen) -> {
+    NextTurn -> {
+      let new_turn = case model.turn {
+        types.White -> types.Black
+        types.Black -> types.White
+        types.Both -> types.Both
+      }
+      #(state.State(..model, turn: new_turn), effect.none())
+    }
+    SetMoveablePlayer(player) -> {
+      let new_model = case player {
+        None -> {
+          #(model, effect.none())
+        }
+        Some(player) -> {
+          let new_moveable =
+            state.Moveable(
+              player: Some(player),
+              moves: model.moveable.moves,
+              after: model.moveable.after,
+            )
+          #(state.State(..model, moveable: new_moveable), effect.none())
+        }
+      }
+      new_model
+    }
+    SetMoves(moves) -> {
+      #(
+        state.State(
+          ..model,
+          moveable: state.Moveable(..model.moveable, moves: moves),
+        ),
+        effect.none(),
+      )
+    }
+    SetFen(fen) -> {
       let new_model = state.update_board_with_fen(model, fen)
       #(new_model, effect.none())
     }
