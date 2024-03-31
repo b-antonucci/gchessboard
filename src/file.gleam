@@ -9,6 +9,19 @@ pub type File {
   H
 }
 
+pub fn to_string(f: File) -> String {
+  case f {
+    A -> "a"
+    B -> "b"
+    C -> "c"
+    D -> "d"
+    E -> "e"
+    F -> "f"
+    G -> "g"
+    H -> "h"
+  }
+}
+
 pub fn from_int(i: Int) -> File {
   case i {
     0 -> H
@@ -24,6 +37,8 @@ pub fn from_int(i: Int) -> File {
 }
 
 pub fn to_int(f: File) -> Int {
+  // TODO: The correspondence between the file and the integer is the wrong
+  // way around. Need to change this and fix whatever breaks.
   case f {
     H -> 0
     G -> 1

@@ -9,6 +9,19 @@ pub type Rank {
   Eight
 }
 
+pub fn to_string(r: Rank) -> String {
+  case r {
+    One -> "1"
+    Two -> "2"
+    Three -> "3"
+    Four -> "4"
+    Five -> "5"
+    Six -> "6"
+    Seven -> "7"
+    Eight -> "8"
+  }
+}
+
 pub fn from_int(i: Int) -> Rank {
   case i {
     0 -> One

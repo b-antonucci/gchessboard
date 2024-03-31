@@ -5,6 +5,12 @@ pub type Position {
   Position(file: File, rank: Rank)
 }
 
+pub fn to_string(position: Position) -> String {
+  let file = file.to_string(position.file)
+  let rank = rank.to_string(position.rank)
+  file <> rank
+}
+
 pub fn from_string(raw_pos_string: String) -> Position {
   case raw_pos_string {
     "a1" -> Position(file.A, rank.One)
@@ -75,14 +81,16 @@ pub fn from_string(raw_pos_string: String) -> Position {
   }
 }
 
+// TODO: See todo in file.gleam
 pub fn from_int(index: Int) -> Position {
   let file = file.from_int(7 - { index % 8 })
   let rank = rank.from_int(index / 8)
   Position(file, rank)
 }
 
+// TODO: See todo in file.gleam
 pub fn to_int(position: Position) -> Int {
-  let file = file.to_int(position.file)
+  let file = 7 - file.to_int(position.file)
   let rank = rank.to_int(position.rank)
   rank * 8 + file
 }

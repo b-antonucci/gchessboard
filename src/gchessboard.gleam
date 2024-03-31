@@ -15,7 +15,7 @@ pub fn init(_) {
 }
 
 @external(javascript, "./ffi.js", "alert_js")
-pub fn alert_js(message: Int) -> Nil
+pub fn alert_js(message: String) -> Nil
 
 pub type Msg {
   RightClick(index: Int)
