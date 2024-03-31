@@ -76,7 +76,7 @@ pub fn from_string(raw_pos_string: String) -> Position {
 }
 
 pub fn from_int(index: Int) -> Position {
-  let file = file.from_int(index % 8)
+  let file = file.from_int(7 - { index % 8 })
   let rank = rank.from_int(index / 8)
   Position(file, rank)
 }
