@@ -34,7 +34,7 @@ pub type MoveData {
     to: Position,
     captured_piece: Option(PlayerPiece),
     en_passant: Option(Position),
-    promotion: Option(Piece),
+    promotion: Bool,
     castling: Option(Castling),
   )
 }
@@ -49,14 +49,17 @@ pub type MoveType {
   Promotion
 }
 
-pub type Destinations {
-  Destinations(destinations: List(Position))
-}
+pub type Destinations =
+  List(Position)
 
-pub type Origin {
-  Origin(origin: Position)
-}
+pub type Origin =
+  Position
 
-pub type Moves {
-  Moves(moves: List(#(Origin, Destinations)))
-}
+pub type Destination =
+  Position
+
+pub type MovesInlined =
+  List(#(Origin, Destination))
+
+pub type Moves =
+  List(#(Origin, Destinations))

@@ -4,7 +4,7 @@ import lustre/element/html.{div, style}
 import lustre/attribute.{class, id, property}
 import state.{type State, LeftClickMode, RightClickMode, State}
 import position.{from_int, to_int}
-import types.{Origin, White}
+import types.{White}
 import config.{type Config, Config}
 import gleam/list
 import gleam/dict
@@ -46,6 +46,7 @@ pub fn update(model: state.State, msg) {
           let new_moveable =
             state.Moveable(
               player: Some(player),
+              promotions: model.moveable.promotions,
               moves: model.moveable.moves,
               after: model.moveable.after,
             )
@@ -87,11 +88,16 @@ pub fn update(model: state.State, msg) {
             Some(moves) -> Some(moves)
             None -> model.moveable.moves
           }
+          let new_promotions = case config_moveable.promotions {
+            Some(promotion) -> Some(promotion)
+            None -> model.moveable.promotions
+          }
           #(
             state.State(
               ..model,
               moveable: state.Moveable(
                 player: new_player,
+                promotions: new_promotions,
                 moves: new_moves,
                 after: new_after,
               ),
@@ -170,14 +176,14 @@ pub fn update(model: state.State, msg) {
                             None -> []
                             Some(moves) -> {
                               let maybe_moves =
-                                list.find(moves.moves, fn(move) {
-                                  move.0 == Origin(origin: from_int(index))
+                                list.find(moves, fn(move) {
+                                  move.0 == from_int(index)
                                 })
                               case maybe_moves {
                                 Error(_) -> []
                                 Ok(moves) -> {
                                   let dests = moves.1
-                                  dests.destinations
+                                  dests
                                 }
                               }
                             }
@@ -201,14 +207,14 @@ pub fn update(model: state.State, msg) {
                                 None -> []
                                 Some(moves) -> {
                                   let maybe_moves =
-                                    list.find(moves.moves, fn(move) {
-                                      move.0 == Origin(origin: from_int(index))
+                                    list.find(moves, fn(move) {
+                                      move.0 == from_int(index)
                                     })
                                   case maybe_moves {
                                     Error(_) -> []
                                     Ok(moves) -> {
                                       let dests = moves.1
-                                      dests.destinations
+                                      dests
                                     }
                                   }
                                 }
@@ -250,7 +256,22 @@ pub fn update(model: state.State, msg) {
                                 effect.from(fn(_) {
                                   case model.moveable.after {
                                     None -> Nil
-                                    Some(after) ->
+                                    Some(after) -> {
+                                      let promotion = case
+                                        model.moveable.promotions
+                                      {
+                                        None -> False
+                                        Some(promotions) ->
+                                          case
+                                            list.contains(promotions, #(
+                                              selected_pos,
+                                              from_int(index),
+                                            ))
+                                          {
+                                            True -> True
+                                            False -> False
+                                          }
+                                      }
                                       after(types.MoveData(
                                         player: model.turn,
                                         player_piece: None,
@@ -259,9 +280,10 @@ pub fn update(model: state.State, msg) {
                                         to: from_int(index),
                                         captured_piece: None,
                                         en_passant: None,
-                                        promotion: None,
+                                        promotion: promotion,
                                         castling: None,
                                       ))
+                                    }
                                   }
                                 }),
                               )
@@ -288,9 +310,8 @@ pub fn update(model: state.State, msg) {
                                     None -> None
                                     Some(moves) -> {
                                       let maybe_moves =
-                                        list.find(moves.moves, fn(move) {
-                                          move.0
-                                          == Origin(origin: from_int(index))
+                                        list.find(moves, fn(move) {
+                                          move.0 == from_int(index)
                                         })
                                       case maybe_moves {
                                         Error(_) -> None
@@ -308,7 +329,7 @@ pub fn update(model: state.State, msg) {
                         None -> []
                         Some(moves) -> {
                           let dests = moves.1
-                          dests.destinations
+                          dests
                         }
                       }
                       #(
@@ -339,8 +360,8 @@ pub fn update(model: state.State, msg) {
                                 None -> None
                                 Some(moves) -> {
                                   let maybe_moves =
-                                    list.find(moves.moves, fn(move) {
-                                      move.0 == Origin(origin: from_int(index))
+                                    list.find(moves, fn(move) {
+                                      move.0 == from_int(index)
                                     })
                                   case maybe_moves {
                                     Error(_) -> None
@@ -358,7 +379,7 @@ pub fn update(model: state.State, msg) {
                     None -> []
                     Some(moves) -> {
                       let dests = moves.1
-                      dests.destinations
+                      dests
                     }
                   }
                   #(

@@ -1,4 +1,4 @@
-import types.{type Moves, type Player, Moves}
+import types.{type Moves, type MovesInlined, type Player}
 import position.{type Position, Position}
 import gleam/string
 import gleam/list
@@ -9,6 +9,7 @@ pub type Moveable {
   Moveable(
     player: Option(Player),
     moves: Option(Moves),
+    promotions: Option(MovesInlined),
     after: Option(fn(types.MoveData) -> Nil),
   )
 }
@@ -321,7 +322,13 @@ pub fn starting_position_board() -> State {
       types.PlayerPiece(moved: False, piece: types.Rook, player: types.Black),
     ),
   ]
-  let moveable = Moveable(player: Some(types.White), moves: None, after: None)
+  let moveable =
+    Moveable(
+      player: Some(types.White),
+      promotions: None,
+      moves: None,
+      after: None,
+    )
 
   State(
     types.White,
