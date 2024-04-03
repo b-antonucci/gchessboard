@@ -1,14 +1,14 @@
-import lustre/event
+import config.{type Config, Config}
+import gleam/dict
+import gleam/list
+import gleam/option.{type Option, None, Some}
+import lustre/attribute.{class, id, property}
 import lustre/effect
 import lustre/element/html.{div, style}
-import lustre/attribute.{class, id, property}
-import state.{type State, LeftClickMode, RightClickMode, State}
+import lustre/event
 import position.{from_int, to_int}
+import state.{type State, LeftClickMode, RightClickMode, State}
 import types.{White}
-import config.{type Config, Config}
-import gleam/list
-import gleam/dict
-import gleam/option.{type Option, None, Some}
 
 pub fn init(_) {
   #(state.starting_position_board(), effect.none())
@@ -155,8 +155,8 @@ pub fn update(model: state.State, msg) {
                 LeftClickMode(selected, targeted) -> {
                   case selected {
                     Some(selected_pos) -> {
-                      case #(selected_pos == from_int(index), targeted) {
-                        #(True, _) -> {
+                      case selected_pos == from_int(index), targeted {
+                        True, _ -> {
                           let new_selected = None
                           let new_targeted = []
                           #(
@@ -170,7 +170,7 @@ pub fn update(model: state.State, msg) {
                             effect.none(),
                           )
                         }
-                        #(False, []) -> {
+                        False, [] -> {
                           let new_selected = Some(from_int(index))
                           let new_targeted = case model.moveable.moves {
                             None -> []
@@ -199,7 +199,7 @@ pub fn update(model: state.State, msg) {
                             effect.none(),
                           )
                         }
-                        #(False, dests) -> {
+                        False, dests -> {
                           case list.contains(dests, from_int(index)) {
                             False -> {
                               let new_selected = Some(from_int(index))
@@ -453,80 +453,80 @@ fn draw_board(model: state.State) {
           case maybe_clicked_piece {
             Error(_) -> []
             Ok(player_piece) -> {
-              case #(player_piece.piece, player_piece.player) {
-                #(types.Pawn(_), types.White) -> [
+              case player_piece.piece, player_piece.player {
+                types.Pawn(_), types.White -> [
                   html.img([
                     attribute.src("assets/Chess_plt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Pawn(_), types.Black) -> [
+                types.Pawn(_), types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_pdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Knight, types.White) -> [
+                types.Knight, types.White -> [
                   html.img([
                     attribute.src("assets/Chess_nlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Knight, types.Black) -> [
+                types.Knight, types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_ndt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Bishop, types.White) -> [
+                types.Bishop, types.White -> [
                   html.img([
                     attribute.src("assets/Chess_blt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Bishop, types.Black) -> [
+                types.Bishop, types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_bdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Rook, types.White) -> [
+                types.Rook, types.White -> [
                   html.img([
                     attribute.src("assets/Chess_rlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Rook, types.Black) -> [
+                types.Rook, types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_rdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Queen, types.White) -> [
+                types.Queen, types.White -> [
                   html.img([
                     attribute.src("assets/Chess_qlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.Queen, types.Black) -> [
+                types.Queen, types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_qdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.King, types.White) -> [
+                types.King, types.White -> [
                   html.img([
                     attribute.src("assets/Chess_klt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                #(types.King, types.Black) -> [
+                types.King, types.Black -> [
                   html.img([
                     attribute.src("assets/Chess_kdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
-                _ -> []
+                _, _ -> []
               }
             }
           }
