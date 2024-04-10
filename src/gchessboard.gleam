@@ -401,10 +401,10 @@ pub fn update(model: state.State, msg) {
 }
 
 const color_order = [
-  "whiteSquare", "blackSquare", "whiteSquare", "blackSquare", "whiteSquare",
-  "blackSquare", "whiteSquare", "blackSquare", "blackSquare", "whiteSquare",
   "blackSquare", "whiteSquare", "blackSquare", "whiteSquare", "blackSquare",
-  "whiteSquare",
+  "whiteSquare", "blackSquare", "whiteSquare", "whiteSquare", "blackSquare",
+  "whiteSquare", "blackSquare", "whiteSquare", "blackSquare", "whiteSquare",
+  "blackSquare",
 ]
 
 fn draw_board(model: state.State) {
