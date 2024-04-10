@@ -22,7 +22,7 @@ pub type Msg {
   LeftClick(index: Int)
   NextTurn
   SetFen(fen: String)
-  SetMoves(moves: Option(types.Moves))
+  SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
   Set(config: Config)
 }
@@ -59,7 +59,7 @@ pub fn update(model: state.State, msg) {
       #(
         state.State(
           ..model,
-          moveable: state.Moveable(..model.moveable, moves: moves),
+          moveable: state.Moveable(..model.moveable, moves: Some(moves)),
         ),
         effect.none(),
       )
