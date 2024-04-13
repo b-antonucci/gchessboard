@@ -24,6 +24,7 @@ pub type Msg {
   SetFen(fen: String)
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
+  SetPromotions(promotions: types.MovesInlined)
   Set(config: Config)
 }
 
@@ -54,6 +55,16 @@ pub fn update(model: state.State, msg) {
         }
       }
       new_model
+    }
+    SetPromotions(promotions) -> {
+      let new_moveable =
+        state.Moveable(
+          player: model.moveable.player,
+          promotions: Some(promotions),
+          moves: model.moveable.moves,
+          after: model.moveable.after,
+        )
+      #(state.State(..model, moveable: new_moveable), effect.none())
     }
     SetMoves(moves) -> {
       #(
