@@ -21,6 +21,9 @@ pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
   NextTurn
+  // TODO: I realize now that a 'builder pattern' would be better
+  // suited to a typed langugage like gleam. Trying to use a 'config'
+  // struct is a bit cumbersome.
   SetFen(fen: String)
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
