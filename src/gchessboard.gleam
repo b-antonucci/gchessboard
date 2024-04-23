@@ -2,7 +2,7 @@ import config.{type Config, Config}
 import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import lustre/attribute.{class, id, property}
+import lustre/attribute.{class, property}
 import lustre/effect
 import lustre/element/html.{div, style}
 import lustre/event
@@ -552,7 +552,7 @@ fn draw_board(model: state.State) {
 }
 
 pub fn view(model: state.State) {
-  div([id("chessboard"), property("oncontextmenu", "return false;")], [
+  div([attribute.attribute("id", "chessboard")], [
     // TODO: replace with css file that we can import
     style(
       [],
