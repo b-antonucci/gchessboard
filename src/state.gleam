@@ -1,9 +1,9 @@
-import types.{type Moves, type MovesInlined, type Player}
-import position.{type Position, Position}
-import gleam/string
-import gleam/list
 import gleam/dict.{type Dict}
+import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/string
+import position.{type Position, Position}
+import types.{type Moves, type MovesInlined, type Player}
 
 pub type Moveable {
   Moveable(
@@ -25,6 +25,7 @@ pub type State {
     pieces: Dict(Int, types.PlayerPiece),
     click_mode: ClickMode,
     moveable: Moveable,
+    visibility: Bool,
   )
 }
 
@@ -124,6 +125,7 @@ pub fn update_board_with_fen(state: State, fen: String) -> State {
     dict.from_list(list_of_pieces),
     state.click_mode,
     state.moveable,
+    state.visibility,
   )
 }
 
@@ -335,5 +337,6 @@ pub fn starting_position_board() -> State {
     dict.from_list(list_of_pieces_rewrite),
     LeftClickMode(selected: None, targeted: []),
     moveable,
+    visibility: False,
   )
 }

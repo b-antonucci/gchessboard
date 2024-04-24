@@ -21,6 +21,7 @@ pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
   NextTurn
+  ToggleVisibility
   // TODO: I realize now that a 'builder pattern' would be better
   // suited to a typed langugage like gleam. Trying to use a 'config'
   // struct is a bit cumbersome.
@@ -409,6 +410,13 @@ pub fn update(model: state.State, msg) {
         }
       }
     }
+    ToggleVisibility -> {
+      let new_visibility = case model.visibility {
+        True -> False
+        False -> True
+      }
+      #(state.State(..model, visibility: new_visibility), effect.none())
+    }
   }
 
   new_state
@@ -552,11 +560,12 @@ fn draw_board(model: state.State) {
 }
 
 pub fn view(model: state.State) {
-  div([attribute.attribute("id", "chessboard")], [
-    // TODO: replace with css file that we can import
-    style(
-      [],
-      "
+  div([attribute.attribute("id", "chessboard")], case model.visibility {
+    True -> [
+      // TODO: replace with css file that we can import
+      style(
+        [],
+        "
         #chessboard {
             width: 480px;
             height: 480px;
@@ -613,7 +622,9 @@ pub fn view(model: state.State) {
             border-color: #b58863;
         }
     ",
-    ),
-    ..draw_board(model)
-  ])
+      ),
+      ..draw_board(model)
+    ]
+    False -> []
+  })
 }
