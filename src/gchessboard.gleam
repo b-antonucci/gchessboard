@@ -443,7 +443,7 @@ fn draw_board(model: state.State) {
     let square_color = case class_name {
       "whiteSquare" -> "#f0d9b5"
       "blackSquare" -> "#b58863"
-      _ -> panic("Invalid class name")
+      _ -> panic as "Invalid class name"
     }
     let square_mark_flag = case model.click_mode {
       LeftClickMode(selected, targeted) -> {

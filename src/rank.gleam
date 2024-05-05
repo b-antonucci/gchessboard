@@ -32,7 +32,7 @@ pub fn from_int(i: Int) -> Rank {
     5 -> Six
     6 -> Seven
     7 -> Eight
-    _ -> panic("Invalid rank")
+    _ -> panic as "Invalid rank"
   }
 }
 

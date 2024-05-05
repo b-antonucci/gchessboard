@@ -61,7 +61,7 @@ pub fn expand_fen_placement_row(row: String) -> String {
           string.append(acc, placement_data)
         }
 
-        _ -> panic("Invalid placement data")
+        _ -> panic as "Invalid placement data"
       }
     })
 
@@ -98,7 +98,7 @@ pub fn update_board_with_fen(state: State, fen: String) -> State {
               "Q" -> types.White
               "K" -> types.White
               "P" -> types.White
-              _ -> panic("Invalid piece")
+              _ -> panic as "Invalid piece"
             }
             let piece_type = case piece {
               "r" | "R" -> types.Rook
@@ -107,7 +107,7 @@ pub fn update_board_with_fen(state: State, fen: String) -> State {
               "q" | "Q" -> types.Queen
               "k" | "K" -> types.King
               "p" | "P" -> types.Pawn(None)
-              _ -> panic("Invalid piece")
+              _ -> panic as "Invalid piece"
             }
             list.prepend(acc, #(
               position,

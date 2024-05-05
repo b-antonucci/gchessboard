@@ -32,7 +32,7 @@ pub fn from_int(i: Int) -> File {
     5 -> C
     6 -> B
     7 -> A
-    _ -> panic("Invalid file")
+    _ -> panic as "Invalid file"
   }
 }
 

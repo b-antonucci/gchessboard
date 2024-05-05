@@ -77,7 +77,7 @@ pub fn from_string(raw_pos_string: String) -> Position {
     "h6" -> Position(file.H, rank.Six)
     "h7" -> Position(file.H, rank.Seven)
     "h8" -> Position(file.H, rank.Eight)
-    _ -> panic("Invalid position string")
+    _ -> panic as "Invalid position string"
   }
 }
 
