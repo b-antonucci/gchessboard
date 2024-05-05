@@ -478,73 +478,73 @@ fn draw_board(model: state.State) {
               case player_piece.piece, player_piece.player {
                 types.Pawn(_), types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_plt45.svg"),
+                    attribute.src("../assets/Chess_plt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Pawn(_), types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_pdt45.svg"),
+                    attribute.src("../assets/Chess_pdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Knight, types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_nlt45.svg"),
+                    attribute.src("../assets/Chess_nlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Knight, types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_ndt45.svg"),
+                    attribute.src("../assets/Chess_ndt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Bishop, types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_blt45.svg"),
+                    attribute.src("../assets/Chess_blt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Bishop, types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_bdt45.svg"),
+                    attribute.src("../assets/Chess_bdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Rook, types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_rlt45.svg"),
+                    attribute.src("../assets/Chess_rlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Rook, types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_rdt45.svg"),
+                    attribute.src("../assets/Chess_rdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Queen, types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_qlt45.svg"),
+                    attribute.src("../assets/Chess_qlt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.Queen, types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_qdt45.svg"),
+                    attribute.src("../assets/Chess_qdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.King, types.White -> [
                   html.img([
-                    attribute.src("assets/Chess_klt45.svg"),
+                    attribute.src("../assets/Chess_klt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
                 types.King, types.Black -> [
                   html.img([
-                    attribute.src("assets/Chess_kdt45.svg"),
+                    attribute.src("../assets/Chess_kdt45.svg"),
                     property("draggable", "false"),
                   ]),
                 ]
