@@ -22,13 +22,11 @@ pub type Msg {
   LeftClick(index: Int)
   NextTurn
   ToggleVisibility
-  // TODO: I realize now that a 'builder pattern' would be better
-  // suited to a typed langugage like gleam. Trying to use a 'config'
-  // struct is a bit cumbersome.
   SetFen(fen: String)
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
   SetPromotions(promotions: types.MovesInlined)
+  // TODO: implement builder pattern for creating a Config
   Set(config: Config)
 }
 
