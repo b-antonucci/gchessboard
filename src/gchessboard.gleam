@@ -28,6 +28,7 @@ pub type Msg {
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
   SetPromotions(promotions: types.MovesInlined)
+  SetTurn(types.Player)
   // TODO: implement builder pattern for creating a Config
   Set(config: Config)
 }
@@ -69,6 +70,9 @@ pub fn update(model: state.State, msg) {
           after: model.moveable.after,
         )
       #(state.State(..model, moveable: new_moveable), effect.none())
+    }
+    SetTurn(new_turn) -> {
+      #(state.State(..model, turn: new_turn), effect.none())
     }
     SetMoves(moves) -> {
       #(
