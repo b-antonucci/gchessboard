@@ -22,6 +22,8 @@ pub type Msg {
   LeftClick(index: Int)
   NextTurn
   ToggleVisibility
+  HideBoard
+  ShowBoard
   SetFen(fen: String)
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
@@ -414,6 +416,12 @@ pub fn update(model: state.State, msg) {
         False -> True
       }
       #(state.State(..model, visibility: new_visibility), effect.none())
+    }
+    HideBoard -> {
+      #(state.State(..model, visibility: False), effect.none())
+    }
+    ShowBoard -> {
+      #(state.State(..model, visibility: True), effect.none())
     }
   }
 
