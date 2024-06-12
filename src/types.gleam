@@ -7,6 +7,11 @@ pub type Player {
   Both
 }
 
+pub type Orientation {
+  WhiteOriented
+  BlackOriented
+}
+
 pub type Piece {
   Pawn(en_passant: Option(Position))
   Knight

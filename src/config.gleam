@@ -1,8 +1,8 @@
-import types.{type Moves, type MovesInlined, type Player}
 import gleam/option.{type Option}
+import types.{type Moves, type MovesInlined, type Orientation, type Player}
 
 pub type Config {
-  Config(moveable: Option(Moveable))
+  Config(moveable: Option(Moveable), orientation: Option(Orientation))
 }
 
 pub type Moveable {

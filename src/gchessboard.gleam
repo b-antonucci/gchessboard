@@ -8,7 +8,7 @@ import lustre/element/html.{div, style}
 import lustre/event
 import position.{from_int, to_int}
 import state.{type State, LeftClickMode, RightClickMode, State}
-import types.{White}
+import types.{Black, Both, White}
 
 pub fn init(_) {
   #(state.starting_position_board(), effect.none())
@@ -111,9 +111,15 @@ pub fn update(model: state.State, msg) {
             Some(promotion) -> Some(promotion)
             None -> model.moveable.promotions
           }
+          let orientation = case config.orientation {
+            Some(types.WhiteOriented) -> types.WhiteOriented
+            Some(types.BlackOriented) -> types.BlackOriented
+            None -> model.orientation
+          }
           #(
             state.State(
               ..model,
+              orientation: orientation,
               moveable: state.Moveable(
                 player: new_player,
                 promotions: new_promotions,
@@ -440,12 +446,20 @@ const color_order = [
 ]
 
 fn draw_board(model: state.State) {
-  let list_of_int_index: List(Int) = [
-    7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18,
-    17, 16, 31, 30, 29, 28, 27, 26, 25, 24, 39, 38, 37, 36, 35, 34, 33, 32, 47,
-    46, 45, 44, 43, 42, 41, 40, 55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60,
-    59, 58, 57, 56,
-  ]
+  let list_of_int_index: List(Int) = case model.orientation {
+    types.WhiteOriented -> [
+      7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19,
+      18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24, 39, 38, 37, 36, 35, 34, 33, 32,
+      47, 46, 45, 44, 43, 42, 41, 40, 55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61,
+      60, 59, 58, 57, 56,
+    ]
+    types.BlackOriented -> [
+      63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45,
+      44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26,
+      25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6,
+      5, 4, 3, 2, 1, 0,
+    ]
+  }
 
   list.fold(list_of_int_index, [], fn(square_list, index) {
     let assert Ok(class_name) = list.at(color_order, index % 16)
