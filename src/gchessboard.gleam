@@ -21,7 +21,6 @@ pub type Msg {
   RightClick(index: Int)
   LeftClick(index: Int)
   NextTurn
-  ToggleVisibility
   HideBoard
   ShowBoard
   SetFen(fen: String)
@@ -419,13 +418,6 @@ pub fn update(model: state.State, msg) {
           }
         }
       }
-    }
-    ToggleVisibility -> {
-      let new_visibility = case model.visibility {
-        True -> False
-        False -> True
-      }
-      #(state.State(..model, visibility: new_visibility), effect.none())
     }
     HideBoard -> {
       #(state.State(..model, visibility: False), effect.none())
