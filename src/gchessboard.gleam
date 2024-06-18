@@ -27,6 +27,7 @@ pub type Msg {
   SetMoves(moves: types.Moves)
   SetMoveablePlayer(player: Option(types.Player))
   SetPromotions(promotions: types.MovesInlined)
+  SetOrientation(orientation: Option(types.Orientation))
   SetTurn(types.Player)
   // TODO: implement builder pattern for creating a Config
   Set(config: Config)
@@ -85,6 +86,17 @@ pub fn update(model: state.State, msg) {
     SetFen(fen) -> {
       let new_model = state.update_board_with_fen(model, fen)
       #(new_model, effect.none())
+    }
+    SetOrientation(orientation) -> {
+      let new_model = case orientation {
+        None -> {
+          #(model, effect.none())
+        }
+        Some(orientation) -> {
+          #(state.State(..model, orientation: orientation), effect.none())
+        }
+      }
+      new_model
     }
     Set(config) -> {
       let new_model = case config.moveable {
