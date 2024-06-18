@@ -127,6 +127,10 @@ pub fn update(model: state.State, msg) {
             Some(types.BlackOriented) -> types.BlackOriented
             None -> model.orientation
           }
+          let model = case config_moveable.fen {
+            Some(fen) -> state.update_board_with_fen(model, fen)
+            None -> model
+          }
           #(
             state.State(
               ..model,
